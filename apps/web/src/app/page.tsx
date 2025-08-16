@@ -10,7 +10,6 @@ import {
   Shield,
   Menu,
   X,
-  ChevronDown,
   Coins,
   ArrowRight,
 } from "lucide-react";
@@ -70,15 +69,11 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              className="hidden h-auto px-6 py-2 text-sm sm:flex"
-            >
-              Sign In
-            </Button>
-            <Button className="hidden h-auto px-6 py-2 text-sm sm:flex">
-              Launch D-Corp
-            </Button>
+            <Link href="/a">
+              <Button className="hidden h-auto px-6 py-2 text-sm sm:flex">
+                Launch D-Corp
+              </Button>
+            </Link>
 
             {/* Mobile menu button */}
             <button

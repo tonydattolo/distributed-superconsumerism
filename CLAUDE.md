@@ -4,8 +4,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-OriginateX is a decentralized mortgage and Mortgage-Backed Securities (MBS) platform combining traditional finance with DeFi on Ethereum. The project uses a monorepo structure with a Next.js web app and Solidity smart contracts.
-
 ## Essential Commands
 
 ### Web Development (in `apps/web`)
@@ -83,8 +81,8 @@ pnpm db:migrate            # Apply migrations to database
    - Use shadcn/ui components from `apps/web/src/components/ui/`
 
 4. **Smart Contract Development**:
-   - Write contracts in `apps/passthru-protocol/src/`
-   - Tests in `apps/passthru-protocol/test/`
+   - Write contracts in `apps/contracts/src/`
+   - Tests in `apps/contracts/test/`
    - Always write comprehensive tests for new functionality, run the tests, and fix any issues that appear in the terminal output.
 
 ## Critical Rules
@@ -92,7 +90,7 @@ pnpm db:migrate            # Apply migrations to database
 1. **Never delete code features unrelated to what we asked about** - Comment it out instead if you think it's not needed and we'll manually determine if it's still needed later.
 2. **File naming**: Use kebab-case (e.g., `user-profile.tsx`)
 3. **No raw SQL**: Use Drizzle ORM schemas to manage our database structure, don't try and generate sql files, we always use db:generate. 
-4. **Environment variables**: we don't use .env files, we use doppler to inject our env vars at runtime using commands like this: `doppler run -p originatex -c dev -- next dev`. we use @t3-oss/env-nextjs in `apps/web/src/env.js` to handle adding env vars we need and then we manually add them to doppler, so you can just add them there. 
+4. **Environment variables**: we don't use .env files, we use doppler to inject our env vars at runtime using commands like this: `doppler run -p distributed-superconsumerism -c dev -- next dev`. we use @t3-oss/env-nextjs in `apps/web/src/env.js` to handle adding env vars we need and then we manually add them to doppler, so you can just add them there. 
 5. **Icons**: dont waste time implementing SVGs just use lucide react icon placeholders
 6. **UI density**: Make interfaces information-dense (Bloomberg terminal style)
 7. **Client components**: Explicitly add 'use client' when using hooks
