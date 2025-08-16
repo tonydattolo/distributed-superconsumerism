@@ -27,60 +27,29 @@ export default async function RootLayout({
     getConfig(),
     (await headers()).get("cookie"),
   );
-  // // Get wagmi initial state from cookies for SSR
-  // let initialState;
-  // try {
-  //   const cookieHeader = (await headers()).get("cookie");
-
-  //   // Extract wagmi state cookie and decode it
-  //   const wagmiCookie = cookieHeader
-  //     ?.split(";")
-  //     .find((c) => c.trim().startsWith("wagmi."))
-  //     ?.split("=")[1];
-
-  //   const decodedCookie = wagmiCookie ? decodeURIComponent(wagmiCookie) : null;
-  //   initialState = cookieToInitialState(getConfig(), decodedCookie);
-  // } catch (error) {
-  //   // If cookie parsing fails, start with undefined state
-  //   console.warn("Failed to parse wagmi cookie state:", error);
-  //   initialState = undefined;
-  // }
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      {/* <head>
-        // React Scan - visualize rerenders https://react-scan.million.dev/
-        <script
-          src="https://unpkg.com/react-scan/dist/auto.global.js"
-          async
-        ></script>
-      </head> */}
-      {/* <PostHogProvider> */}
-      <body className={cn("min-h-screen font-sans antialiased")}>
-        <TooltipProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Providers initialState={initialState}>
-              <SidebarProvider>
-                <AppSidebar />
-                <SidebarInset>
-                  <div className="relative flex h-full flex-1 flex-col">
-                    <StickyHeader />
-                    {children}
-                  </div>
-                </SidebarInset>
-              </SidebarProvider>
-            </Providers>
-            <Toaster richColors />
-          </ThemeProvider>
-        </TooltipProvider>
-      </body>
-      {/* </PostHogProvider> */}
-    </html>
+    <TooltipProvider>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <Providers initialState={initialState}>
+          <SidebarProvider>
+            <AppSidebar />
+            <SidebarInset>
+              <div className="relative flex h-full flex-1 flex-col">
+                <StickyHeader />
+                {children}
+              </div>
+            </SidebarInset>
+          </SidebarProvider>
+        </Providers>
+        <Toaster richColors />
+      </ThemeProvider>
+    </TooltipProvider>
   );
 }
 

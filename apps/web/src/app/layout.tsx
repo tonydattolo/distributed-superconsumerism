@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 
 import { type Metadata } from "next";
 import { Geist, Orbitron } from "next/font/google";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -24,10 +25,13 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
+      suppressHydrationWarning
       lang="en"
-      className={`${geist.variable} ${fontBrand.variable} bg-background text-foreground`}
+      className={`dark ${fontBrand.variable} bg-background text-foreground`}
     >
-      <body>{children}</body>
+      <body className={cn("min-h-screen font-sans antialiased")}>
+        {children}
+      </body>
     </html>
   );
 }
