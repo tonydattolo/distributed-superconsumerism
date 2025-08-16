@@ -1,4 +1,4 @@
-// Example model schema from the Drizzle docs
+// Database schema for the distributed superconsumerism platform
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
 import { sql } from "drizzle-orm";
@@ -25,3 +25,6 @@ export const posts = createTable(
   }),
   (t) => [index("name_idx").on(t.name)],
 );
+
+// Re-export all D-Corp schemas
+export * from "./schemas/d-corps-schema";

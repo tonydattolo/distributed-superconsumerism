@@ -39,7 +39,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="bg-background flex min-h-screen flex-col overflow-x-hidden font-sans">
+    <div className="dark bg-background flex min-h-screen flex-col overflow-x-hidden font-sans">
       <header
         className={`fixed top-0 z-40 w-full transition-all duration-500 ${
           scrolled
@@ -49,10 +49,10 @@ export default function Home() {
       >
         <div className="container flex h-20 items-center justify-between py-4">
           <div className="flex items-center gap-2">
-            <div className="relative flex items-center gap-2">
-              <Building2 className="text-primary h-8 w-8" />
-              <span className="text-xl font-bold tracking-wider">D-CORP</span>
-            </div>
+            <div className="relative"></div>
+            <span className="font-orbitron text-foreground text-xl tracking-wider">
+              NOVA ROMA
+            </span>
           </div>
 
           {/* Desktop Navigation */}
@@ -130,13 +130,10 @@ export default function Home() {
               Distributed Superconsumerism
             </div>
 
-            <h1 className="text-foreground relative inline-block text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
-              <span className="relative z-10">The Future of</span>
-              <br />
-              <span className="text-primary relative z-10">
-                Corporate Structure
-              </span>
-              <div className="via-primary/50 absolute -bottom-2 left-0 h-1 w-full bg-gradient-to-r from-transparent to-transparent"></div>
+            <h1 className="text-primary relative inline-block text-5xl font-bold tracking-tight uppercase sm:text-6xl md:text-7xl lg:text-8xl">
+              <span className="font-orbitron relative z-10">D-Corp</span>
+              <div className="absolute -bottom-2 left-0 h-1 w-full bg-gradient-to-r from-transparent via-red-700 to-transparent"></div>
+              <div className="bg-primary/30 absolute -bottom-2 left-0 h-1 w-full blur-sm"></div>
             </h1>
 
             <p className="text-muted-foreground mt-8 text-xl md:text-2xl">

@@ -13,39 +13,47 @@ export const createDCorpSchema = z.object({
     { message: "Distribution percentages must total 100%" }
   ),
   attestations: z.object({
-    waiveFiduciaryDuty: z.boolean().refine(val => val === true),
-    agreeToDistribution: z.boolean().refine(val => val === true),
-    agreeToPrinciples: z.boolean().refine(val => val === true),
+    waiveFiduciaryDuty: z.boolean().refine(val => val === true, {
+      message: "You must agree to waive fiduciary duty"
+    }),
+    agreeToDistribution: z.boolean().refine(val => val === true, {
+      message: "You must agree to the distribution terms"
+    }),
+    agreeToPrinciples: z.boolean().refine(val => val === true, {
+      message: "You must agree to the D-Corp principles"
+    }),
   }),
 });
 
 export type CreateDCorpInput = z.infer<typeof createDCorpSchema>;
 
-export const createOpportunitySchema = z.object({
-  title: z.string().min(1).max(200),
-  description: z.string().min(1),
-  category: z.enum(["development", "design", "content", "marketing", "other"]),
-  pointsAwarded: z.number().min(1).max(10000),
-  estimatedHours: z.number().min(0.5).max(40),
-  difficulty: z.enum(["easy", "medium", "hard"]),
-  requirements: z.array(z.string()),
-  deadline: z.date().optional(),
+
+export const createDistributionSchema = z.object({
+  totalAmount: z.number().min(0.01, "Amount must be greater than 0"),
+  quarter: z.string().min(1, "Quarter is required"),
+  notes: z.string().optional(),
 });
 
-export type CreateOpportunityInput = z.infer<typeof createOpportunitySchema>;
+export type CreateDistributionInput = z.infer<typeof createDistributionSchema>;
 
-export const distributionSchema = z.object({
-  amount: z.number().min(0),
-  note: z.string().optional(),
+export const updateTreasurySchema = z.object({
+  amount: z.number().min(0, "Amount must be non-negative"),
+  operation: z.enum(["add", "set"]),
+  notes: z.string().optional(),
 });
 
-export type DistributionInput = z.infer<typeof distributionSchema>;
+export type UpdateTreasuryInput = z.infer<typeof updateTreasurySchema>;
 
-export const submissionReviewSchema = z.object({
-  submissionId: z.string(),
-  decision: z.enum(["approve", "reject"]),
-  feedback: z.string().optional(),
-  pointsAwarded: z.number().min(0).optional(),
+export const addMemberSchema = z.object({
+  userId: z.string().uuid("Invalid user ID"),
+  role: z.enum(["founder", "admin", "member"]).default("member"),
 });
 
-export type SubmissionReviewInput = z.infer<typeof submissionReviewSchema>;
+export type AddMemberInput = z.infer<typeof addMemberSchema>;
+
+export const updateMemberRoleSchema = z.object({
+  memberId: z.string().uuid("Invalid member ID"),
+  role: z.enum(["founder", "admin", "member"]),
+});
+
+export type UpdateMemberRoleInput = z.infer<typeof updateMemberRoleSchema>;
