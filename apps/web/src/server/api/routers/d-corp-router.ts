@@ -1,19 +1,15 @@
 import { z } from "zod";
-import { eq, and, desc, isNull } from "drizzle-orm";
+import { eq, and, desc, isNull, count } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
-import {
-  createTRPCRouter,
-  authenticatedProcedure,
-  publicProcedure,
-} from "@/server/api/trpc";
+import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import {
   dCorps,
   distributions,
   dCorpMembers,
-  type DCorp,
-  type Distribution,
-} from "@/server/db/schema";
+  // type DCorp,
+  // type Distribution,
+} from "@/server/db/schemas/d-corps-schema";
 import {
   createDCorpSchema,
   createDistributionSchema,
@@ -21,8 +17,11 @@ import {
 
 export const dCorpRouter = createTRPCRouter({
   // D-Corp Management
-  create: authenticatedProcedure
-    .input(createDCorpSchema)
+  create: publicProcedure
+    .input(createDCorpSchema.extend({
+      founderWalletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address"),
+      blockchainTxHash: z.string().optional(),
+    }))
     .mutation(async ({ ctx, input }) => {
       const [dCorp] = await ctx.db
         .insert(dCorps)
@@ -34,7 +33,8 @@ export const dCorpRouter = createTRPCRouter({
           laborPercentage: input.distributionConfig.labor,
           consumerPercentage: input.distributionConfig.consumers,
           attestations: input.attestations,
-          founderId: "user-id-placeholder", // TODO: Replace with actual user ID from auth
+          founderWalletAddress: input.founderWalletAddress,
+          blockchainTxHash: input.blockchainTxHash,
         })
         .returning();
 
@@ -48,7 +48,7 @@ export const dCorpRouter = createTRPCRouter({
       // Add founder as a member with founder role
       await ctx.db.insert(dCorpMembers).values({
         dCorpId: dCorp.id,
-        userId: "user-id-placeholder", // TODO: Replace with actual user ID from auth
+        walletAddress: input.founderWalletAddress,
         role: "founder",
       });
 
@@ -56,7 +56,7 @@ export const dCorpRouter = createTRPCRouter({
     }),
 
   // Get D-Corp by ID
-  getById: authenticatedProcedure
+  getById: publicProcedure
     .input(z.object({ dCorpId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const [dCorp] = await ctx.db
@@ -75,7 +75,7 @@ export const dCorpRouter = createTRPCRouter({
     }),
 
   // Get dashboard data
-  getDashboardData: authenticatedProcedure
+  getDashboardData: publicProcedure
     .input(z.object({ dCorpId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const [dCorp] = await ctx.db
@@ -100,15 +100,14 @@ export const dCorpRouter = createTRPCRouter({
 
       // Get member count
       const memberCount = await ctx.db
-        .select({ count: z.number() })
+        .select({ count: count() })
         .from(dCorpMembers)
         .where(
           and(
             eq(dCorpMembers.dCorpId, input.dCorpId),
-            isNull(dCorpMembers.deletedAt)
-          )
+            isNull(dCorpMembers.deletedAt),
+          ),
         );
-
 
       return {
         dCorp,
@@ -122,31 +121,35 @@ export const dCorpRouter = createTRPCRouter({
     }),
 
   // List user's D-Corps
-  getUserDCorps: authenticatedProcedure.query(async ({ ctx }) => {
-    const userDCorps = await ctx.db
-      .select({
-        dCorp: dCorps,
-        role: dCorpMembers.role,
-      })
-      .from(dCorpMembers)
-      .innerJoin(dCorps, eq(dCorps.id, dCorpMembers.dCorpId))
-      .where(
-        and(
-          eq(dCorpMembers.userId, "user-id-placeholder"), // TODO: Replace with actual user ID
-          isNull(dCorpMembers.deletedAt),
-          isNull(dCorps.deletedAt)
-        )
-      );
+  getUserDCorps: publicProcedure
+    .input(z.object({
+      walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address"),
+    }))
+    .query(async ({ ctx, input }) => {
+      const userDCorps = await ctx.db
+        .select({
+          dCorp: dCorps,
+          role: dCorpMembers.role,
+        })
+        .from(dCorpMembers)
+        .innerJoin(dCorps, eq(dCorps.id, dCorpMembers.dCorpId))
+        .where(
+          and(
+            eq(dCorpMembers.walletAddress, input.walletAddress),
+            isNull(dCorpMembers.deletedAt),
+            isNull(dCorps.deletedAt),
+          ),
+        );
 
-    return userDCorps;
-  }),
+      return userDCorps;
+    }),
 
   // Distribution Management
-  createDistribution: authenticatedProcedure
+  createDistribution: publicProcedure
     .input(
       createDistributionSchema.extend({
         dCorpId: z.string().uuid(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const [dCorp] = await ctx.db
@@ -164,7 +167,8 @@ export const dCorpRouter = createTRPCRouter({
       // Calculate distribution amounts based on percentages
       const capitalAmount = (input.totalAmount * dCorp.capitalPercentage) / 100;
       const laborAmount = (input.totalAmount * dCorp.laborPercentage) / 100;
-      const consumerAmount = (input.totalAmount * dCorp.consumerPercentage) / 100;
+      const consumerAmount =
+        (input.totalAmount * dCorp.consumerPercentage) / 100;
 
       const [distribution] = await ctx.db
         .insert(distributions)
@@ -183,7 +187,7 @@ export const dCorpRouter = createTRPCRouter({
     }),
 
   // Get distributions for a D-Corp
-  getDistributions: authenticatedProcedure
+  getDistributions: publicProcedure
     .input(z.object({ dCorpId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const distributionsList = await ctx.db
@@ -196,13 +200,15 @@ export const dCorpRouter = createTRPCRouter({
     }),
 
   // Treasury Management
-  updateTreasuryBalance: authenticatedProcedure
-    .input(z.object({
-      dCorpId: z.string().uuid(),
-      amount: z.number().min(0),
-      operation: z.enum(["add", "set"]),
-      notes: z.string().optional(),
-    }))
+  updateTreasuryBalance: publicProcedure
+    .input(
+      z.object({
+        dCorpId: z.string().uuid(),
+        amount: z.number().min(0),
+        operation: z.enum(["add", "set"]),
+        notes: z.string().optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const [dCorp] = await ctx.db
         .select()
@@ -216,10 +222,11 @@ export const dCorpRouter = createTRPCRouter({
         });
       }
 
-      const currentBalance = parseFloat(dCorp.treasuryBalance);
-      const newBalance = input.operation === "add" 
-        ? currentBalance + input.amount 
-        : input.amount;
+      const currentBalance = parseFloat(dCorp.treasuryBalance ?? "0");
+      const newBalance =
+        input.operation === "add"
+          ? currentBalance + input.amount
+          : input.amount;
 
       const [updatedDCorp] = await ctx.db
         .update(dCorps)
@@ -234,7 +241,7 @@ export const dCorpRouter = createTRPCRouter({
     }),
 
   // Member Management
-  getMembers: authenticatedProcedure
+  getMembers: publicProcedure
     .input(z.object({ dCorpId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const members = await ctx.db
@@ -243,20 +250,22 @@ export const dCorpRouter = createTRPCRouter({
         .where(
           and(
             eq(dCorpMembers.dCorpId, input.dCorpId),
-            isNull(dCorpMembers.deletedAt)
-          )
+            isNull(dCorpMembers.deletedAt),
+          ),
         )
         .orderBy(desc(dCorpMembers.joinedAt));
 
       return members;
     }),
 
-  addMember: authenticatedProcedure
-    .input(z.object({
-      dCorpId: z.string().uuid(),
-      userId: z.string().uuid(),
-      role: z.enum(["founder", "admin", "member"]).default("member"),
-    }))
+  addMember: publicProcedure
+    .input(
+      z.object({
+        dCorpId: z.string().uuid(),
+        walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address"),
+        role: z.enum(["founder", "admin", "member"]).default("member"),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       // Check if member already exists
       const [existingMember] = await ctx.db
@@ -265,15 +274,15 @@ export const dCorpRouter = createTRPCRouter({
         .where(
           and(
             eq(dCorpMembers.dCorpId, input.dCorpId),
-            eq(dCorpMembers.userId, input.userId),
-            isNull(dCorpMembers.deletedAt)
-          )
+            eq(dCorpMembers.walletAddress, input.walletAddress),
+            isNull(dCorpMembers.deletedAt),
+          ),
         );
 
       if (existingMember) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "User is already a member of this D-Corp",
+          message: "Wallet is already a member of this D-Corp",
         });
       }
 
@@ -281,7 +290,7 @@ export const dCorpRouter = createTRPCRouter({
         .insert(dCorpMembers)
         .values({
           dCorpId: input.dCorpId,
-          userId: input.userId,
+          walletAddress: input.walletAddress,
           role: input.role,
         })
         .returning();
@@ -289,11 +298,13 @@ export const dCorpRouter = createTRPCRouter({
       return member;
     }),
 
-  updateMemberRole: authenticatedProcedure
-    .input(z.object({
-      memberId: z.string().uuid(),
-      role: z.enum(["founder", "admin", "member"]),
-    }))
+  updateMemberRole: publicProcedure
+    .input(
+      z.object({
+        memberId: z.string().uuid(),
+        role: z.enum(["founder", "admin", "member"]),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const [updatedMember] = await ctx.db
         .update(dCorpMembers)
@@ -314,10 +325,12 @@ export const dCorpRouter = createTRPCRouter({
       return updatedMember;
     }),
 
-  removeMember: authenticatedProcedure
-    .input(z.object({
-      memberId: z.string().uuid(),
-    }))
+  removeMember: publicProcedure
+    .input(
+      z.object({
+        memberId: z.string().uuid(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const [removedMember] = await ctx.db
         .update(dCorpMembers)

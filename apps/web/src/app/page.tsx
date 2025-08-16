@@ -144,10 +144,12 @@ export default function Home() {
             </p>
 
             <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="h-auto px-8 py-4 text-base">
-                Launch Your D-Corp
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <Link href="/a">
+                <Button size="lg" className="h-auto px-8 py-4 text-base">
+                  Launch Your D-Corp
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
               <Button
                 variant="outline"
                 size="lg"

@@ -47,7 +47,7 @@ export function StepDistribution({ form }: StepDistributionProps) {
               <FormItem>
                 <FormLabel className="flex items-center justify-between">
                   <span>Capital Providers</span>
-                  <span className="text-sm font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  <span className="text-sm font-mono bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
                     {field.value}%
                   </span>
                 </FormLabel>
@@ -89,7 +89,7 @@ export function StepDistribution({ form }: StepDistributionProps) {
               <FormItem>
                 <FormLabel className="flex items-center justify-between">
                   <span>Labor Contributors</span>
-                  <span className="text-sm font-mono bg-green-100 text-green-800 px-2 py-1 rounded">
+                  <span className="text-sm font-mono bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">
                     {field.value}%
                   </span>
                 </FormLabel>
@@ -131,7 +131,7 @@ export function StepDistribution({ form }: StepDistributionProps) {
               <FormItem>
                 <FormLabel className="flex items-center justify-between">
                   <span>Consumers</span>
-                  <span className="text-sm font-mono bg-amber-100 text-amber-800 px-2 py-1 rounded">
+                  <span className="text-sm font-mono bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 px-2 py-1 rounded">
                     {field.value}%
                   </span>
                 </FormLabel>
@@ -166,15 +166,15 @@ export function StepDistribution({ form }: StepDistributionProps) {
             )}
           />
 
-          <div className={`p-4 rounded-lg border ${isValid ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
+          <div className={`p-4 rounded-lg border ${isValid ? "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800" : "bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800"}`}>
             <div className="flex items-center justify-between">
               <span className="font-medium">Total:</span>
-              <span className={`font-mono text-lg ${isValid ? "text-green-800" : "text-red-800"}`}>
+              <span className={`font-mono text-lg ${isValid ? "text-green-800 dark:text-green-200" : "text-red-800 dark:text-red-200"}`}>
                 {total}%
               </span>
             </div>
             {!isValid && (
-              <p className="text-sm text-red-700 mt-1">
+              <p className="text-sm text-red-700 dark:text-red-300 mt-1">
                 Distribution must total exactly 100%
               </p>
             )}
@@ -223,9 +223,9 @@ export function StepDistribution({ form }: StepDistributionProps) {
         </div>
       </div>
 
-      <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-        <h4 className="font-medium text-amber-900 mb-2">Distribution Guidelines</h4>
-        <ul className="text-sm text-amber-800 space-y-1">
+      <div className="bg-amber-50 dark:bg-amber-950 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
+        <h4 className="font-medium text-amber-900 dark:text-amber-100 mb-2">Distribution Guidelines</h4>
+        <ul className="text-sm text-amber-800 dark:text-amber-200 space-y-1">
           <li>• Capital allocation typically ranges from 10-40%</li>
           <li>• Labor allocation should reflect the value of human contribution</li>
           <li>• Consumer allocation creates network effects and loyalty</li>

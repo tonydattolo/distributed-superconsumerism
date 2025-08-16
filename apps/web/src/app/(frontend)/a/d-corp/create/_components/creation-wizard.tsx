@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,6 +21,9 @@ import {
   createDCorpSchema,
   type CreateDCorpInput,
 } from "@/lib/validations/d-corp";
+import { useCreateDCorp } from "@/lib/wagmi/hooks";
+import { Form } from "@/components/ui/form";
+import { useAccount } from "wagmi";
 
 import { StepBasics } from "./step-basics";
 import { StepDistribution } from "./step-distribution";
@@ -36,7 +39,9 @@ const steps = [
 
 export function CreationWizard() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isBlockchainStep, setIsBlockchainStep] = useState(false);
   const router = useRouter();
+  const { address: walletAddress } = useAccount();
 
   const form = useForm<CreateDCorpInput>({
     resolver: zodResolver(createDCorpSchema),
@@ -56,6 +61,16 @@ export function CreationWizard() {
       },
     },
   });
+
+  // Blockchain hook for creating D-Corp on-chain
+  const {
+    createDCorp: createDCorpOnChain,
+    hash,
+    isPending: isBlockchainPending,
+    isConfirming,
+    isConfirmed,
+    error: blockchainError,
+  } = useCreateDCorp();
 
   const createDCorp = api.dCorp.create.useMutation({
     onSuccess: (dCorp) => {
@@ -82,9 +97,32 @@ export function CreationWizard() {
     }
   };
 
-  const onSubmit = (data: CreateDCorpInput) => {
-    createDCorp.mutate(data);
+  const onSubmit = async (data: CreateDCorpInput) => {
+    setIsBlockchainStep(true);
+    
+    // First, create the D-Corp on-chain
+    createDCorpOnChain(
+      data.name,
+      data.symbol,
+      data.distributionConfig.capital,
+      data.distributionConfig.labor,
+      data.distributionConfig.consumers
+    );
   };
+
+  // Handle blockchain transaction completion
+  useEffect(() => {
+    if (isConfirmed && hash && walletAddress) {
+      // After blockchain transaction is confirmed, save to database
+      const formData = form.getValues();
+      createDCorp.mutate({
+        ...formData,
+        founderWalletAddress: walletAddress,
+        blockchainTxHash: hash,
+      });
+      setIsBlockchainStep(false);
+    }
+  }, [isConfirmed, hash, createDCorp, form, walletAddress]);
 
   const getFieldsForStep = (step: number): (keyof CreateDCorpInput)[] => {
     switch (step) {
@@ -115,6 +153,23 @@ export function CreationWizard() {
   };
 
   const progress = (currentStep / steps.length) * 100;
+
+  // Show wallet connection message if no wallet is connected
+  if (!walletAddress) {
+    return (
+      <div className="container mx-auto max-w-4xl px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-4">Connect Your Wallet</h1>
+          <p className="text-muted-foreground mb-8">
+            Please connect your Ethereum wallet to create a D-Corp.
+          </p>
+          <Button variant="outline" onClick={() => window.location.reload()}>
+            Refresh Page
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
@@ -171,18 +226,44 @@ export function CreationWizard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStep}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-              >
-                {renderStep()}
-              </motion.div>
-            </AnimatePresence>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentStep}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {renderStep()}
+                </motion.div>
+              </AnimatePresence>
+
+            {/* Blockchain Transaction Status */}
+            {(hash ?? blockchainError) && (
+              <div className="mt-6 p-4 border rounded-lg bg-muted/50">
+                {hash && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Blockchain Transaction</p>
+                    <p className="text-xs text-muted-foreground font-mono">
+                      Hash: {hash}
+                    </p>
+                    {isConfirming && (
+                      <p className="text-sm text-yellow-600 dark:text-yellow-400">⛏️ Mining transaction...</p>
+                    )}
+                    {isConfirmed && (
+                      <p className="text-sm text-green-600 dark:text-green-400">✅ Transaction confirmed!</p>
+                    )}
+                  </div>
+                )}
+                {blockchainError && (
+                  <div className="text-sm text-red-600 dark:text-red-400">
+                    ❌ Blockchain Error: {blockchainError.shortMessage ?? blockchainError.message}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="mt-8 flex justify-between">
               <Button
@@ -201,14 +282,21 @@ export function CreationWizard() {
               ) : (
                 <Button
                   type="submit"
-                  disabled={createDCorp.isPending}
+                  disabled={isBlockchainPending ?? isConfirming ?? createDCorp.isPending}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 >
-                  {createDCorp.isPending ? "Creating..." : "Launch D-Corp"}
+                  {isBlockchainPending 
+                    ? "🔗 Sign Transaction..." 
+                    : isConfirming 
+                    ? "⛏️ Mining Transaction..." 
+                    : createDCorp.isPending 
+                    ? "💾 Saving to Database..." 
+                    : "🚀 Launch D-Corp"}
                 </Button>
               )}
             </div>
-          </form>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

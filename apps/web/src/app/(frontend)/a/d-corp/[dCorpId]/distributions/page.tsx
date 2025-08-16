@@ -4,6 +4,8 @@ import { use } from "react";
 import { api } from "@/trpc/react";
 import { DistributionForm } from "./_components/distribution-form";
 import { DistributionHistory } from "./_components/distribution-history";
+import { VaultManagement } from "./_components/vault-management";
+import { AirdropForm } from "./_components/airdrop-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -108,7 +110,17 @@ export default function DistributionsPage({ params }: DistributionsPageProps) {
         </div>
       </div>
 
-      {/* Distribution Form */}
+      {/* Vault Management with Blockchain Integration */}
+      <VaultManagement
+        dCorpId={dCorpId}
+        vaultAddress={dCorp.vaultAddress}
+        distributionConfig={dCorp.distributionConfig}
+      />
+
+      {/* Token Airdrop */}
+      <AirdropForm />
+
+      {/* Traditional Distribution Form */}
       <DistributionForm 
         dCorp={dCorp} 
         onSuccess={() => refetchDistributions()}

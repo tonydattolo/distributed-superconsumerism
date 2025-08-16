@@ -4,7 +4,14 @@ import { type UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
 import { type CreateDCorpInput } from "@/lib/validations/d-corp";
 
 interface StepBasicsProps {
@@ -81,12 +88,13 @@ export function StepBasics({ form }: StepBasicsProps) {
         )}
       />
 
-      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-        <h3 className="font-medium text-blue-900 mb-2">What is a D-Corp?</h3>
-        <p className="text-sm text-blue-700">
-          A Distributed Corporation is a new form of organization that distributes profits
-          among capital providers, labor contributors, and consumers based on predetermined
-          percentages. It operates transparently on blockchain technology.
+      <div className="rounded-lg border p-4">
+        <h3 className="mb-2 font-medium">What is a D-Corp?</h3>
+        <p>
+          A Distributed Corporation is a new form of organization that
+          distributes profits among capital providers, labor contributors, and
+          consumers based on predetermined percentages. It operates
+          transparently on blockchain technology.
         </p>
       </div>
     </div>
