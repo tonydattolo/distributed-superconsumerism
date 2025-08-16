@@ -3,7 +3,7 @@ CREATE TYPE "public"."distribution_status" AS ENUM('pending', 'processing', 'com
 CREATE TABLE "d_corp_members" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"d_corp_id" uuid NOT NULL,
-	"user_id" uuid NOT NULL,
+	"wallet_address" varchar(42) NOT NULL,
 	"role" "d_corp_member_role" DEFAULT 'member',
 	"joined_at" timestamp DEFAULT now() NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -22,8 +22,11 @@ CREATE TABLE "d_corps" (
 	"treasury_balance" numeric(18, 2) DEFAULT '0',
 	"total_distributed" numeric(18, 2) DEFAULT '0',
 	"attestations" jsonb NOT NULL,
+	"blockchain_tx_hash" varchar(66),
+	"contract_address" varchar(42),
+	"vault_address" varchar(42),
 	"is_active" boolean DEFAULT true,
-	"founder_id" uuid NOT NULL,
+	"founder_wallet_address" varchar(42) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"deleted_at" timestamp

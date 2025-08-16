@@ -1,5 +1,5 @@
 {
-  "id": "6e000ed8-8037-473d-8145-c19c81040bae",
+  "id": "da87f960-ddaf-463b-8e05-a410b105c447",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -21,9 +21,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
+        "wallet_address": {
+          "name": "wallet_address",
+          "type": "varchar(42)",
           "primaryKey": false,
           "notNull": true
         },
@@ -152,6 +152,24 @@
           "primaryKey": false,
           "notNull": true
         },
+        "blockchain_tx_hash": {
+          "name": "blockchain_tx_hash",
+          "type": "varchar(66)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contract_address": {
+          "name": "contract_address",
+          "type": "varchar(42)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vault_address": {
+          "name": "vault_address",
+          "type": "varchar(42)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "is_active": {
           "name": "is_active",
           "type": "boolean",
@@ -159,9 +177,9 @@
           "notNull": false,
           "default": true
         },
-        "founder_id": {
-          "name": "founder_id",
-          "type": "uuid",
+        "founder_wallet_address": {
+          "name": "founder_wallet_address",
+          "type": "varchar(42)",
           "primaryKey": false,
           "notNull": true
         },

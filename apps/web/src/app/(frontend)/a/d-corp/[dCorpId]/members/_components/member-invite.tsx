@@ -3,13 +3,32 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { api } from "@/trpc/react";
 import { addMemberSchema, type AddMemberInput } from "@/lib/validations/d-corp";
 import { UserPlus, Crown, Shield, User } from "lucide-react";
@@ -21,7 +40,6 @@ interface MemberInviteProps {
 
 export function MemberInvite({ dCorpId, onMemberAdded }: MemberInviteProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { toast } = useToast();
 
   const form = useForm<AddMemberInput>({
     resolver: zodResolver(addMemberSchema),
@@ -33,20 +51,13 @@ export function MemberInvite({ dCorpId, onMemberAdded }: MemberInviteProps) {
 
   const addMember = api.dCorp.addMember.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Member added successfully",
-        description: "The new member has been added to your D-Corp.",
-      });
+      toast.success("Member added successfully");
       form.reset();
       setIsOpen(false);
       onMemberAdded();
     },
     onError: (error) => {
-      toast({
-        title: "Error adding member",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message);
     },
   });
 
@@ -73,13 +84,13 @@ export function MemberInvite({ dCorpId, onMemberAdded }: MemberInviteProps) {
       <Card>
         <CardContent className="pt-6">
           <div className="text-center">
-            <UserPlus className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">Add New Member</h3>
+            <UserPlus className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+            <h3 className="mb-2 text-lg font-medium">Add New Member</h3>
             <p className="text-muted-foreground mb-4">
               Invite new stakeholders to join your D-Corp
             </p>
             <Button onClick={() => setIsOpen(true)}>
-              <UserPlus className="h-4 w-4 mr-2" />
+              <UserPlus className="mr-2 h-4 w-4" />
               Add Member
             </Button>
           </div>
@@ -128,7 +139,10 @@ export function MemberInvite({ dCorpId, onMemberAdded }: MemberInviteProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Role</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a role" />
@@ -164,15 +178,17 @@ export function MemberInvite({ dCorpId, onMemberAdded }: MemberInviteProps) {
           />
 
           {/* Role Permissions Preview */}
-          <div className="bg-muted/50 p-4 rounded-lg">
-            <h4 className="font-medium mb-3 flex items-center gap-2">
+          <div className="bg-muted/50 rounded-lg p-4">
+            <h4 className="mb-3 flex items-center gap-2 font-medium">
               {getRoleIcon(form.watch("role"))}
               {form.watch("role")} Permissions
             </h4>
-            <div className="text-sm space-y-2">
+            <div className="space-y-2 text-sm">
               {form.watch("role") === "founder" && (
                 <div className="space-y-1">
-                  <Badge variant="default" className="mr-2">Full Access</Badge>
+                  <Badge variant="default" className="mr-2">
+                    Full Access
+                  </Badge>
                   <p>• Create and manage distributions</p>
                   <p>• Manage all members and roles</p>
                   <p>• Treasury management</p>
@@ -181,7 +197,9 @@ export function MemberInvite({ dCorpId, onMemberAdded }: MemberInviteProps) {
               )}
               {form.watch("role") === "admin" && (
                 <div className="space-y-1">
-                  <Badge variant="secondary" className="mr-2">Administrative</Badge>
+                  <Badge variant="secondary" className="mr-2">
+                    Administrative
+                  </Badge>
                   <p>• Create and manage distributions</p>
                   <p>• Manage members (except founders)</p>
                   <p>• Treasury management</p>
@@ -190,7 +208,9 @@ export function MemberInvite({ dCorpId, onMemberAdded }: MemberInviteProps) {
               )}
               {form.watch("role") === "member" && (
                 <div className="space-y-1">
-                  <Badge variant="outline" className="mr-2">Basic Access</Badge>
+                  <Badge variant="outline" className="mr-2">
+                    Basic Access
+                  </Badge>
                   <p>• View distributions</p>
                   <p>• View member list</p>
                   <p>• Access member portal</p>

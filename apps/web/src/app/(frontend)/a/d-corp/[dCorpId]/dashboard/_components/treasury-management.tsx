@@ -3,24 +3,46 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { api } from "@/trpc/react";
-import { updateTreasurySchema, type UpdateTreasuryInput } from "@/lib/validations/d-corp";
-import { type DCorp } from "@/server/db/schema";
-import { 
-  DollarSign, 
-  TrendingUp, 
+import {
+  updateTreasurySchema,
+  type UpdateTreasuryInput,
+} from "@/lib/validations/d-corp";
+import { type DCorp } from "@/server/db/schemas/d-corps-schema";
+import {
+  DollarSign,
+  TrendingUp,
   TrendingDown,
   Wallet,
   Plus,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 
 interface TreasuryManagementProps {
@@ -28,9 +50,11 @@ interface TreasuryManagementProps {
   onTreasuryUpdate: () => void;
 }
 
-export function TreasuryManagement({ dCorp, onTreasuryUpdate }: TreasuryManagementProps) {
+export function TreasuryManagement({
+  dCorp,
+  onTreasuryUpdate,
+}: TreasuryManagementProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { toast } = useToast();
 
   const form = useForm<UpdateTreasuryInput>({
     resolver: zodResolver(updateTreasurySchema),
@@ -43,20 +67,13 @@ export function TreasuryManagement({ dCorp, onTreasuryUpdate }: TreasuryManageme
 
   const updateTreasury = api.dCorp.updateTreasuryBalance.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Treasury updated successfully",
-        description: "The treasury balance has been updated.",
-      });
+      toast.success("Treasury updated successfully");
       form.reset();
       setIsOpen(false);
       onTreasuryUpdate();
     },
     onError: (error) => {
-      toast({
-        title: "Error updating treasury",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message);
     },
   });
 
@@ -68,19 +85,18 @@ export function TreasuryManagement({ dCorp, onTreasuryUpdate }: TreasuryManageme
   };
 
   const formatCurrency = (amount: string) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(parseFloat(amount));
   };
 
   const currentBalance = parseFloat(dCorp.treasuryBalance);
   const previewAmount = form.watch("amount");
   const operation = form.watch("operation");
-  
-  const newBalance = operation === "add" 
-    ? currentBalance + previewAmount 
-    : previewAmount;
+
+  const newBalance =
+    operation === "add" ? currentBalance + previewAmount : previewAmount;
 
   if (!isOpen) {
     return (
@@ -97,7 +113,7 @@ export function TreasuryManagement({ dCorp, onTreasuryUpdate }: TreasuryManageme
         <CardContent>
           <div className="flex gap-3">
             <Button onClick={() => setIsOpen(true)} className="flex-1">
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 h-4 w-4" />
               Manage Treasury
             </Button>
           </div>
@@ -113,21 +129,19 @@ export function TreasuryManagement({ dCorp, onTreasuryUpdate }: TreasuryManageme
           <Wallet className="h-5 w-5" />
           Treasury Management
         </CardTitle>
-        <CardDescription>
-          Add funds or set the treasury balance
-        </CardDescription>
+        <CardDescription>Add funds or set the treasury balance</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Current Balance Display */}
-          <div className="bg-muted/50 p-4 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
+          <div className="bg-muted/50 rounded-lg p-4">
+            <div className="mb-2 flex items-center justify-between">
               <span className="text-sm font-medium">Current Balance</span>
               <Badge variant="secondary">
                 {formatCurrency(dCorp.treasuryBalance)}
               </Badge>
             </div>
-            
+
             {previewAmount > 0 && (
               <>
                 <Separator className="my-3" />
@@ -148,14 +162,17 @@ export function TreasuryManagement({ dCorp, onTreasuryUpdate }: TreasuryManageme
             )}
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid gap-6 md:grid-cols-2">
             <FormField
               control={form.control}
               name="operation"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Operation</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select operation" />
@@ -177,10 +194,9 @@ export function TreasuryManagement({ dCorp, onTreasuryUpdate }: TreasuryManageme
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    {operation === "add" 
-                      ? "Add funds to the current balance" 
-                      : "Set the treasury to a specific amount"
-                    }
+                    {operation === "add"
+                      ? "Add funds to the current balance"
+                      : "Set the treasury to a specific amount"}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -195,7 +211,7 @@ export function TreasuryManagement({ dCorp, onTreasuryUpdate }: TreasuryManageme
                   <FormLabel>Amount</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <DollarSign className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
                       <Input
                         type="number"
                         step="0.01"
@@ -204,15 +220,16 @@ export function TreasuryManagement({ dCorp, onTreasuryUpdate }: TreasuryManageme
                         className="pl-10"
                         data-1p-ignore
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          field.onChange(parseFloat(e.target.value) || 0)
+                        }
                       />
                     </div>
                   </FormControl>
                   <FormDescription>
-                    {operation === "add" 
-                      ? "Amount to add to treasury" 
-                      : "New treasury balance"
-                    }
+                    {operation === "add"
+                      ? "Amount to add to treasury"
+                      : "New treasury balance"}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -243,15 +260,19 @@ export function TreasuryManagement({ dCorp, onTreasuryUpdate }: TreasuryManageme
 
           {/* Warning for Set Operation */}
           {operation === "set" && previewAmount < currentBalance && (
-            <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
               <div className="flex items-start gap-3">
-                <TrendingDown className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <TrendingDown className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
                 <div>
-                  <h4 className="font-medium text-amber-800">Balance Reduction Warning</h4>
-                  <p className="text-sm text-amber-700 mt-1">
-                    You're about to reduce the treasury balance by{" "}
-                    {formatCurrency((currentBalance - previewAmount).toString())}.
-                    Make sure this is intentional.
+                  <h4 className="font-medium text-amber-800">
+                    Balance Reduction Warning
+                  </h4>
+                  <p className="mt-1 text-sm text-amber-700">
+                    You&apos;re about to reduce the treasury balance by{" "}
+                    {formatCurrency(
+                      (currentBalance - previewAmount).toString(),
+                    )}
+                    . Make sure this is intentional.
                   </p>
                 </div>
               </div>

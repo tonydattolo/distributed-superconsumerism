@@ -3,18 +3,34 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
+import { toast } from "sonner";
 import { api } from "@/trpc/react";
-import { createDistributionSchema, type CreateDistributionInput } from "@/lib/validations/d-corp";
-import { type DCorp } from "@/server/db/schema";
+import {
+  createDistributionSchema,
+  type CreateDistributionInput,
+} from "@/lib/validations/d-corp";
+import { type DCorp } from "@/server/db/schemas/d-corps-schema";
 import { DollarSign, Percent, ArrowDown } from "lucide-react";
 
 interface DistributionFormProps {
@@ -24,7 +40,6 @@ interface DistributionFormProps {
 
 export function DistributionForm({ dCorp, onSuccess }: DistributionFormProps) {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
-  const { toast } = useToast();
 
   const form = useForm<CreateDistributionInput>({
     resolver: zodResolver(createDistributionSchema),
@@ -39,20 +54,13 @@ export function DistributionForm({ dCorp, onSuccess }: DistributionFormProps) {
 
   const createDistribution = api.dCorp.createDistribution.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Distribution created successfully",
-        description: "The distribution has been scheduled for processing.",
-      });
+      toast.success("Distribution created successfully");
       form.reset();
       setIsPreviewMode(false);
       onSuccess?.();
     },
     onError: (error) => {
-      toast({
-        title: "Error creating distribution",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message);
     },
   });
 
@@ -68,9 +76,9 @@ export function DistributionForm({ dCorp, onSuccess }: DistributionFormProps) {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
@@ -92,9 +100,9 @@ export function DistributionForm({ dCorp, onSuccess }: DistributionFormProps) {
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid gap-6 md:grid-cols-2">
               <div>
-                <h3 className="font-semibold mb-4">Distribution Details</h3>
+                <h3 className="mb-4 font-semibold">Distribution Details</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Total Amount:</span>
@@ -104,12 +112,14 @@ export function DistributionForm({ dCorp, onSuccess }: DistributionFormProps) {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Quarter:</span>
-                    <Badge variant="secondary">{form.getValues("quarter")}</Badge>
+                    <Badge variant="secondary">
+                      {form.getValues("quarter")}
+                    </Badge>
                   </div>
                   {form.getValues("notes") && (
                     <div>
                       <span className="text-muted-foreground">Notes:</span>
-                      <p className="text-sm mt-1 p-2 bg-muted rounded">
+                      <p className="bg-muted mt-1 rounded p-2 text-sm">
                         {form.getValues("notes")}
                       </p>
                     </div>
@@ -118,35 +128,47 @@ export function DistributionForm({ dCorp, onSuccess }: DistributionFormProps) {
               </div>
 
               <div>
-                <h3 className="font-semibold mb-4">Allocation Breakdown</h3>
+                <h3 className="mb-4 font-semibold">Allocation Breakdown</h3>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-blue-50 p-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                      <span className="font-medium">Capital ({dCorp.capitalPercentage}%)</span>
+                      <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                      <span className="font-medium">
+                        Capital ({dCorp.capitalPercentage}%)
+                      </span>
                     </div>
                     <span className="font-mono">
-                      {formatCurrency(calculateAmount(dCorp.capitalPercentage, totalAmount))}
+                      {formatCurrency(
+                        calculateAmount(dCorp.capitalPercentage, totalAmount),
+                      )}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-green-50 p-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <span className="font-medium">Labor ({dCorp.laborPercentage}%)</span>
+                      <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                      <span className="font-medium">
+                        Labor ({dCorp.laborPercentage}%)
+                      </span>
                     </div>
                     <span className="font-mono">
-                      {formatCurrency(calculateAmount(dCorp.laborPercentage, totalAmount))}
+                      {formatCurrency(
+                        calculateAmount(dCorp.laborPercentage, totalAmount),
+                      )}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                  <div className="flex items-center justify-between rounded-lg bg-amber-50 p-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                      <span className="font-medium">Consumers ({dCorp.consumerPercentage}%)</span>
+                      <div className="h-3 w-3 rounded-full bg-amber-500"></div>
+                      <span className="font-medium">
+                        Consumers ({dCorp.consumerPercentage}%)
+                      </span>
                     </div>
                     <span className="font-mono">
-                      {formatCurrency(calculateAmount(dCorp.consumerPercentage, totalAmount))}
+                      {formatCurrency(
+                        calculateAmount(dCorp.consumerPercentage, totalAmount),
+                      )}
                     </span>
                   </div>
                 </div>
@@ -169,7 +191,9 @@ export function DistributionForm({ dCorp, onSuccess }: DistributionFormProps) {
                 disabled={createDistribution.isPending}
                 className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
               >
-                {createDistribution.isPending ? "Processing..." : "Create Distribution"}
+                {createDistribution.isPending
+                  ? "Processing..."
+                  : "Create Distribution"}
               </Button>
             </div>
           </form>
@@ -186,15 +210,19 @@ export function DistributionForm({ dCorp, onSuccess }: DistributionFormProps) {
           Create Distribution
         </CardTitle>
         <CardDescription>
-          Distribute profits to all stakeholder classes according to configured percentages
+          Distribute profits to all stakeholder classes according to configured
+          percentages
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          setIsPreviewMode(true);
-        }} className="space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setIsPreviewMode(true);
+          }}
+          className="space-y-6"
+        >
+          <div className="grid gap-6 md:grid-cols-2">
             <FormField
               control={form.control}
               name="totalAmount"
@@ -203,7 +231,7 @@ export function DistributionForm({ dCorp, onSuccess }: DistributionFormProps) {
                   <FormLabel>Total Distribution Amount</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <DollarSign className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
                       <Input
                         type="number"
                         step="0.01"
@@ -212,7 +240,9 @@ export function DistributionForm({ dCorp, onSuccess }: DistributionFormProps) {
                         className="pl-10"
                         data-1p-ignore
                         {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          field.onChange(parseFloat(e.target.value) || 0)
+                        }
                       />
                     </div>
                   </FormControl>
@@ -269,28 +299,34 @@ export function DistributionForm({ dCorp, onSuccess }: DistributionFormProps) {
           />
 
           {totalAmount > 0 && (
-            <div className="bg-muted/50 p-4 rounded-lg">
-              <h4 className="font-medium mb-3 flex items-center gap-2">
+            <div className="bg-muted/50 rounded-lg p-4">
+              <h4 className="mb-3 flex items-center gap-2 font-medium">
                 <Percent className="h-4 w-4" />
                 Quick Preview
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+              <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-3">
                 <div className="flex justify-between">
                   <span>Capital ({dCorp.capitalPercentage}%):</span>
                   <span className="font-mono">
-                    {formatCurrency(calculateAmount(dCorp.capitalPercentage, totalAmount))}
+                    {formatCurrency(
+                      calculateAmount(dCorp.capitalPercentage, totalAmount),
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Labor ({dCorp.laborPercentage}%):</span>
                   <span className="font-mono">
-                    {formatCurrency(calculateAmount(dCorp.laborPercentage, totalAmount))}
+                    {formatCurrency(
+                      calculateAmount(dCorp.laborPercentage, totalAmount),
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Consumers ({dCorp.consumerPercentage}%):</span>
                   <span className="font-mono">
-                    {formatCurrency(calculateAmount(dCorp.consumerPercentage, totalAmount))}
+                    {formatCurrency(
+                      calculateAmount(dCorp.consumerPercentage, totalAmount),
+                    )}
                   </span>
                 </div>
               </div>
@@ -298,8 +334,11 @@ export function DistributionForm({ dCorp, onSuccess }: DistributionFormProps) {
           )}
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={!form.formState.isValid || totalAmount <= 0}>
-              <ArrowDown className="w-4 h-4 mr-2" />
+            <Button
+              type="submit"
+              disabled={!form.formState.isValid || totalAmount <= 0}
+            >
+              <ArrowDown className="mr-2 h-4 w-4" />
               Preview Distribution
             </Button>
           </div>

@@ -32,19 +32,25 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { toast } from "sonner";
 import { api } from "@/trpc/react";
-import { type DCorpMember } from "@/server/db/schema";
-import { 
-  MoreHorizontal, 
-  Search, 
-  UserPlus, 
-  Crown, 
-  Shield, 
+import { type DCorpMember } from "@/server/db/schemas/d-corps-schema";
+import {
+  MoreHorizontal,
+  Search,
+  UserPlus,
+  Crown,
+  Shield,
   User,
   Calendar,
-  Trash2
+  Trash2,
 } from "lucide-react";
 
 interface MembersTableProps {
@@ -53,47 +59,36 @@ interface MembersTableProps {
   onMemberUpdate: () => void;
 }
 
-export function MembersTable({ dCorpId, members, onMemberUpdate }: MembersTableProps) {
+export function MembersTable({
+  dCorpId,
+  members,
+  onMemberUpdate,
+}: MembersTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("all");
-  const { toast } = useToast();
 
   const updateMemberRole = api.dCorp.updateMemberRole.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Member role updated",
-        description: "The member's role has been updated successfully.",
-      });
+      toast.success("Member role updated");
       onMemberUpdate();
     },
     onError: (error) => {
-      toast({
-        title: "Error updating member role",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message);
     },
   });
 
   const removeMember = api.dCorp.removeMember.useMutation({
     onSuccess: () => {
-      toast({
-        title: "Member removed",
-        description: "The member has been removed from the D-Corp.",
-      });
+      toast.success("Member removed");
       onMemberUpdate();
     },
     onError: (error) => {
-      toast({
-        title: "Error removing member",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(error.message);
     },
   });
 
   const filteredMembers = members.filter((member) => {
-    const matchesSearch = member.userId.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = member.walletAddress?.includes(searchTerm);
     const matchesRole = selectedRole === "all" || member.role === selectedRole;
     return matchesSearch && matchesRole;
   });
@@ -120,7 +115,10 @@ export function MembersTable({ dCorpId, members, onMemberUpdate }: MembersTableP
     }
   };
 
-  const handleRoleUpdate = (memberId: string, newRole: "founder" | "admin" | "member") => {
+  const handleRoleUpdate = (
+    memberId: string,
+    newRole: "founder" | "admin" | "member",
+  ) => {
     updateMemberRole.mutate({
       memberId,
       role: newRole,
@@ -140,15 +138,13 @@ export function MembersTable({ dCorpId, members, onMemberUpdate }: MembersTableP
           <UserPlus className="h-5 w-5" />
           Members ({members.length})
         </CardTitle>
-        <CardDescription>
-          Manage D-Corp members and their roles
-        </CardDescription>
+        <CardDescription>Manage D-Corp members and their roles</CardDescription>
       </CardHeader>
       <CardContent>
         {/* Filters */}
-        <div className="flex gap-4 mb-6">
+        <div className="mb-6 flex gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-3 left-3 h-4 w-4" />
             <Input
               placeholder="Search members..."
               value={searchTerm}
@@ -160,7 +156,7 @@ export function MembersTable({ dCorpId, members, onMemberUpdate }: MembersTableP
           <select
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value)}
-            className="px-3 py-2 border rounded-md bg-background"
+            className="bg-background rounded-md border px-3 py-2"
           >
             <option value="all">All Roles</option>
             <option value="founder">Founders</option>
@@ -170,7 +166,7 @@ export function MembersTable({ dCorpId, members, onMemberUpdate }: MembersTableP
         </div>
 
         {/* Members Table */}
-        <div className="border rounded-lg">
+        <div className="rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -183,10 +179,12 @@ export function MembersTable({ dCorpId, members, onMemberUpdate }: MembersTableP
             <TableBody>
               {filteredMembers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8">
-                    <User className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <TableCell colSpan={4} className="py-8 text-center">
+                    <User className="text-muted-foreground mx-auto mb-2 h-8 w-8" />
                     <p className="text-muted-foreground">
-                      {members.length === 0 ? "No members found" : "No members match your filters"}
+                      {members.length === 0
+                        ? "No members found"
+                        : "No members match your filters"}
                     </p>
                   </TableCell>
                 </TableRow>
@@ -198,7 +196,7 @@ export function MembersTable({ dCorpId, members, onMemberUpdate }: MembersTableP
                         {getRoleIcon(member.role)}
                         <div>
                           <p className="font-medium">{member.userId}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-muted-foreground text-sm">
                             Member ID: {member.id.slice(0, 8)}...
                           </p>
                         </div>
@@ -210,7 +208,7 @@ export function MembersTable({ dCorpId, members, onMemberUpdate }: MembersTableP
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="text-muted-foreground flex items-center gap-2 text-sm">
                         <Calendar className="h-4 w-4" />
                         {format(new Date(member.joinedAt), "MMM d, yyyy")}
                       </div>
@@ -221,7 +219,10 @@ export function MembersTable({ dCorpId, members, onMemberUpdate }: MembersTableP
                           <Button
                             variant="ghost"
                             size="sm"
-                            disabled={updateMemberRole.isPending || removeMember.isPending}
+                            disabled={
+                              updateMemberRole.isPending ||
+                              removeMember.isPending
+                            }
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
@@ -231,25 +232,31 @@ export function MembersTable({ dCorpId, members, onMemberUpdate }: MembersTableP
                           <DropdownMenuSeparator />
                           {member.role !== "founder" && (
                             <DropdownMenuItem
-                              onClick={() => handleRoleUpdate(member.id, "founder")}
+                              onClick={() =>
+                                handleRoleUpdate(member.id, "founder")
+                              }
                             >
-                              <Crown className="h-4 w-4 mr-2" />
+                              <Crown className="mr-2 h-4 w-4" />
                               Make Founder
                             </DropdownMenuItem>
                           )}
                           {member.role !== "admin" && (
                             <DropdownMenuItem
-                              onClick={() => handleRoleUpdate(member.id, "admin")}
+                              onClick={() =>
+                                handleRoleUpdate(member.id, "admin")
+                              }
                             >
-                              <Shield className="h-4 w-4 mr-2" />
+                              <Shield className="mr-2 h-4 w-4" />
                               Make Admin
                             </DropdownMenuItem>
                           )}
                           {member.role !== "member" && (
                             <DropdownMenuItem
-                              onClick={() => handleRoleUpdate(member.id, "member")}
+                              onClick={() =>
+                                handleRoleUpdate(member.id, "member")
+                              }
                             >
-                              <User className="h-4 w-4 mr-2" />
+                              <User className="mr-2 h-4 w-4" />
                               Make Member
                             </DropdownMenuItem>
                           )}
@@ -260,16 +267,18 @@ export function MembersTable({ dCorpId, members, onMemberUpdate }: MembersTableP
                                 onSelect={(e) => e.preventDefault()}
                                 className="text-red-600"
                               >
-                                <Trash2 className="h-4 w-4 mr-2" />
+                                <Trash2 className="mr-2 h-4 w-4" />
                                 Remove Member
                               </DropdownMenuItem>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Remove Member</AlertDialogTitle>
+                                <AlertDialogTitle>
+                                  Remove Member
+                                </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to remove this member from the D-Corp?
-                                  This action cannot be undone.
+                                  Are you sure you want to remove this member
+                                  from the D-Corp? This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -294,29 +303,29 @@ export function MembersTable({ dCorpId, members, onMemberUpdate }: MembersTableP
         </div>
 
         {/* Role Distribution Summary */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-yellow-50 rounded-lg">
-            <Crown className="h-6 w-6 text-yellow-600 mx-auto mb-2" />
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="rounded-lg bg-yellow-50 p-4 text-center">
+            <Crown className="mx-auto mb-2 h-6 w-6 text-yellow-600" />
             <div className="text-lg font-semibold">
-              {members.filter(m => m.role === "founder").length}
+              {members.filter((m) => m.role === "founder").length}
             </div>
-            <div className="text-sm text-muted-foreground">Founders</div>
+            <div className="text-muted-foreground text-sm">Founders</div>
           </div>
-          
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <Shield className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+
+          <div className="rounded-lg bg-blue-50 p-4 text-center">
+            <Shield className="mx-auto mb-2 h-6 w-6 text-blue-600" />
             <div className="text-lg font-semibold">
-              {members.filter(m => m.role === "admin").length}
+              {members.filter((m) => m.role === "admin").length}
             </div>
-            <div className="text-sm text-muted-foreground">Admins</div>
+            <div className="text-muted-foreground text-sm">Admins</div>
           </div>
-          
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <User className="h-6 w-6 text-gray-600 mx-auto mb-2" />
+
+          <div className="rounded-lg bg-gray-50 p-4 text-center">
+            <User className="mx-auto mb-2 h-6 w-6 text-gray-600" />
             <div className="text-lg font-semibold">
-              {members.filter(m => m.role === "member").length}
+              {members.filter((m) => m.role === "member").length}
             </div>
-            <div className="text-sm text-muted-foreground">Members</div>
+            <div className="text-muted-foreground text-sm">Members</div>
           </div>
         </div>
       </CardContent>
