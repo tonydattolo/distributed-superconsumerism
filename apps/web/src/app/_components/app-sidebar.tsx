@@ -1,4 +1,4 @@
-import { Calendar, Command, Home, Inbox, Search, Settings } from "lucide-react";
+import { Building2, Command, Home, Plus, Settings, Users } from "lucide-react";
 
 import {
   Sidebar,
@@ -15,24 +15,24 @@ import {
 // Menu items.
 const items = [
   {
-    title: "Home",
-    url: "#",
+    title: "Dashboard",
+    url: "/a",
     icon: Home,
   },
   {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
+    title: "Create D-Corp",
+    url: "/a/d-corp/create",
+    icon: Plus,
   },
   {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
+    title: "My D-Corps",
+    url: "/a/d-corp",
+    icon: Building2,
   },
   {
-    title: "Search",
+    title: "Community",
     url: "#",
-    icon: Search,
+    icon: Users,
   },
   {
     title: "Settings",
@@ -53,8 +53,8 @@ export function AppSidebar() {
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium">D-Corp Platform</span>
+                  <span className="truncate text-xs">Distributed</span>
                 </div>
               </a>
             </SidebarMenuButton>

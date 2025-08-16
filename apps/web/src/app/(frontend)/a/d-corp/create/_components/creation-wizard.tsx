@@ -4,14 +4,23 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { api } from "@/trpc/react";
-import { createDCorpSchema, type CreateDCorpInput } from "@/lib/validations/d-corp";
+import {
+  createDCorpSchema,
+  type CreateDCorpInput,
+} from "@/lib/validations/d-corp";
 
 import { StepBasics } from "./step-basics";
 import { StepDistribution } from "./step-distribution";
@@ -28,7 +37,6 @@ const steps = [
 export function CreationWizard() {
   const [currentStep, setCurrentStep] = useState(1);
   const router = useRouter();
-  const { toast } = useToast();
 
   const form = useForm<CreateDCorpInput>({
     resolver: zodResolver(createDCorpSchema),
@@ -51,17 +59,12 @@ export function CreationWizard() {
 
   const createDCorp = api.dCorp.create.useMutation({
     onSuccess: (dCorp) => {
-      toast({
-        title: "D-Corp created successfully!",
-        description: `${dCorp.name} has been launched.`,
-      });
+      toast.success(`${dCorp.name} has been launched.`);
       router.push(`/a/d-corp/${dCorp.id}/dashboard`);
     },
     onError: (error) => {
-      toast({
-        title: "Error creating D-Corp",
+      toast.error("Error creating D-Corp", {
         description: error.message,
-        variant: "destructive",
       });
     },
   });
@@ -114,7 +117,7 @@ export function CreationWizard() {
   const progress = (currentStep / steps.length) * 100;
 
   return (
-    <div className="container mx-auto max-w-4xl py-8 px-4">
+    <div className="container mx-auto max-w-4xl px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Create Your D-Corp</h1>
         <p className="text-muted-foreground mt-2">
@@ -123,11 +126,11 @@ export function CreationWizard() {
       </div>
 
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors ${
                   step.id <= currentStep
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground"
@@ -138,15 +141,19 @@ export function CreationWizard() {
               <div className="ml-2 hidden sm:block">
                 <p
                   className={`text-sm font-medium ${
-                    step.id <= currentStep ? "text-foreground" : "text-muted-foreground"
+                    step.id <= currentStep
+                      ? "text-foreground"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {step.title}
                 </p>
-                <p className="text-xs text-muted-foreground">{step.description}</p>
+                <p className="text-muted-foreground text-xs">
+                  {step.description}
+                </p>
               </div>
               {index < steps.length - 1 && (
-                <div className="w-12 h-0.5 bg-muted mx-4 hidden sm:block" />
+                <div className="bg-muted mx-4 hidden h-0.5 w-12 sm:block" />
               )}
             </div>
           ))}
@@ -156,8 +163,12 @@ export function CreationWizard() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Step {currentStep}: {steps[currentStep - 1]?.title}</CardTitle>
-          <CardDescription>{steps[currentStep - 1]?.description}</CardDescription>
+          <CardTitle>
+            Step {currentStep}: {steps[currentStep - 1]?.title}
+          </CardTitle>
+          <CardDescription>
+            {steps[currentStep - 1]?.description}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -173,7 +184,7 @@ export function CreationWizard() {
               </motion.div>
             </AnimatePresence>
 
-            <div className="flex justify-between mt-8">
+            <div className="mt-8 flex justify-between">
               <Button
                 type="button"
                 variant="outline"
