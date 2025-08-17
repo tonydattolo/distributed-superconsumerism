@@ -48,28 +48,50 @@ export function useDeployOVault() {
       setDeploymentStep('asset');
       
       toast.info("🚀 LayerZero OVault Deployment Started", {
-        description: "Deploying omnichain vault system for hackathon demo",
+        description: "Deploying real omnichain vault system across testnets",
       });
 
-      // For hackathon demo, we'll simulate the deployment process
-      // In reality, this would involve calling the hardhat deployment scripts
+      // REAL DEPLOYMENT: This should call the actual hardhat deployment process
+      // We need to integrate with the hardhat scripts in apps/ovault-dcorp
       
       // Step 1: Deploy Asset OFT on hub chain (Arbitrum Sepolia)
       toast.info("📦 Deploying Asset OFT", {
         description: `Deploying ${config.assetName} on Arbitrum Sepolia (Hub Chain)`,
       });
       
-      // Simulate deployment delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // TODO: Replace with actual contract deployment
+      // This should call: `pnpm hardhat lz:deploy --tags ovault --networks arbitrum`
+      // For now, we'll use writeContract to deploy individual contracts
       
-      // Update database with simulated address
+      throw new Error("Real contract deployment not yet implemented. Please integrate with hardhat scripts from apps/ovault-dcorp");
+      
+      /*
+      // REAL IMPLEMENTATION WOULD LOOK LIKE:
+      
+      // Deploy Asset OFT on hub chain
+      const assetOFTDeployment = await writeContract({
+        abi: myAssetOFTABI,
+        bytecode: assetOFTBytecode, // Import from compiled contracts
+        args: [config.assetName, config.assetSymbol, LAYERZERO_ENDPOINTS[40231], config.owner],
+      });
+      
+      // Wait for transaction
+      await waitForTransactionReceipt({ hash: assetOFTDeployment });
+      
+      // Get deployed address from transaction receipt
+      const assetOFTAddress = getContractAddress({
+        from: config.owner,
+        nonce: await getTransactionCount({ address: config.owner }),
+      });
+      
       await updateOVaultMutation.mutateAsync({
         dCorpId,
         step: 'asset_oft_hub',
-        txHash: `0x${Math.random().toString(16).slice(2, 66)}`,
-        contractAddress: `0x${Math.random().toString(16).slice(2, 42)}`,
+        txHash: assetOFTDeployment,
+        contractAddress: assetOFTAddress,
         contractType: 'assetOFT',
       });
+      */
 
       setDeploymentStep('vault');
       toast.info("🏦 Deploying ERC4626 Vault", {
