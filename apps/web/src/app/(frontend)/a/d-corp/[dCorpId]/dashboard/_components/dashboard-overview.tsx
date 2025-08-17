@@ -115,23 +115,23 @@ export function DashboardOverview({ dCorp, metrics, recentDistributions, onDataR
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-700">{dCorp.capitalPercentage}%</div>
-              <div className="text-sm text-blue-600">Capital Providers</div>
+            <div className="text-center p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{dCorp.capitalPercentage}%</div>
+              <div className="text-sm text-blue-600 dark:text-blue-400">Capital Providers</div>
               <div className="text-xs text-muted-foreground mt-1">
                 Investors & shareholders
               </div>
             </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-700">{dCorp.laborPercentage}%</div>
-              <div className="text-sm text-green-600">Labor Contributors</div>
+            <div className="text-center p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+              <div className="text-2xl font-bold text-green-700 dark:text-green-300">{dCorp.laborPercentage}%</div>
+              <div className="text-sm text-green-600 dark:text-green-400">Labor Contributors</div>
               <div className="text-xs text-muted-foreground mt-1">
                 Workers & contributors
               </div>
             </div>
-            <div className="text-center p-4 bg-amber-50 rounded-lg">
-              <div className="text-2xl font-bold text-amber-700">{dCorp.consumerPercentage}%</div>
-              <div className="text-sm text-amber-600">Consumers</div>
+            <div className="text-center p-4 bg-amber-50 dark:bg-amber-950 rounded-lg">
+              <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">{dCorp.consumerPercentage}%</div>
+              <div className="text-sm text-amber-600 dark:text-amber-400">Consumers</div>
               <div className="text-xs text-muted-foreground mt-1">
                 Customers & users
               </div>
@@ -160,10 +160,10 @@ export function DashboardOverview({ dCorp, metrics, recentDistributions, onDataR
           </CardHeader>
           <CardContent className="space-y-4">
             {parseFloat(metrics.treasuryBalance) > 1000 && (
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
                 <div>
-                  <p className="font-medium text-blue-800">Create Distribution</p>
-                  <p className="text-sm text-blue-600">
+                  <p className="font-medium text-blue-800 dark:text-blue-200">Create Distribution</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400">
                     Treasury balance ready for distribution
                   </p>
                 </div>
@@ -174,10 +174,10 @@ export function DashboardOverview({ dCorp, metrics, recentDistributions, onDataR
             )}
 
             {metrics.memberCount < 5 && (
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
                 <div>
-                  <p className="font-medium text-green-800">Invite Members</p>
-                  <p className="text-sm text-green-600">
+                  <p className="font-medium text-green-800 dark:text-green-200">Invite Members</p>
+                  <p className="text-sm text-green-600 dark:text-green-400">
                     Expand your D-Corp stakeholder base
                   </p>
                 </div>
@@ -188,10 +188,10 @@ export function DashboardOverview({ dCorp, metrics, recentDistributions, onDataR
             )}
 
             {parseFloat(metrics.treasuryBalance) === 0 && (
-              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950 rounded-lg border border-amber-200 dark:border-amber-800">
                 <div>
-                  <p className="font-medium text-amber-800">Fund Treasury</p>
-                  <p className="text-sm text-amber-600">
+                  <p className="font-medium text-amber-800 dark:text-amber-200">Fund Treasury</p>
+                  <p className="text-sm text-amber-600 dark:text-amber-400">
                     Add funds to enable distributions
                   </p>
                 </div>

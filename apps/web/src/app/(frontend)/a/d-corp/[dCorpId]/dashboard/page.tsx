@@ -63,7 +63,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
             <Skeleton className="h-4 w-64 mb-4" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="text-center p-4 bg-gray-50 rounded-lg">
+                <div key={i} className="text-center p-4 bg-muted rounded-lg">
                   <Skeleton className="h-8 w-12 mx-auto mb-2" />
                   <Skeleton className="h-4 w-24 mx-auto mb-1" />
                   <Skeleton className="h-3 w-20 mx-auto" />
