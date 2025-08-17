@@ -132,8 +132,8 @@ export default function DashboardPage({ params }: DashboardPageProps) {
     );
   }
 
-  // Show OVault setup wizard if OVault is not deployed
-  if (oVaultStatus?.oVaultStatus === "not_deployed") {
+  // Show OVault setup wizard if OVault is not deployed or is deploying
+  if (oVaultStatus?.oVaultStatus === "not_deployed" || oVaultStatus?.oVaultStatus === "deploying") {
     return (
       <div className="container mx-auto py-8 px-4">
         <OVaultSetupWizard
@@ -173,19 +173,6 @@ export default function DashboardPage({ params }: DashboardPageProps) {
     );
   }
 
-  // Show deployment status if in progress
-  if (oVaultStatus?.oVaultStatus === "deploying") {
-    return (
-      <div className="container mx-auto py-8 px-4">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            OVault deployment is in progress. Please wait while the omnichain vault system is being deployed.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
 
   // Fallback to traditional dashboard
   return (

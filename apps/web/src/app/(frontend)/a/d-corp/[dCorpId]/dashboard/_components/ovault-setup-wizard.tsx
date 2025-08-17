@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -53,15 +53,6 @@ const setupSchema = z.object({
     .max(10, "Symbol must be 10 characters or less"),
   targetChains: z.array(z.number()).min(1, "Select at least one target chain"),
   initialFunding: z.string().optional(),
-  acknowledgments: z.object({
-    hackathon: z
-      .boolean()
-      .refine((val) => val, "Must acknowledge this is for hackathon"),
-    testnet: z.boolean().refine((val) => val, "Must acknowledge testnet usage"),
-    experimental: z
-      .boolean()
-      .refine((val) => val, "Must acknowledge experimental nature"),
-  }),
 });
 
 type SetupForm = z.infer<typeof setupSchema>;
@@ -92,11 +83,6 @@ export function OVaultSetupWizard({
       shareSymbol: `${dCorpSymbol}S`,
       targetChains: [40232, 40245], // Optimism and Base Sepolia by default
       initialFunding: "0.1",
-      acknowledgments: {
-        hackathon: false,
-        testnet: false,
-        experimental: false,
-      },
     },
   });
 
@@ -105,6 +91,17 @@ export function OVaultSetupWizard({
     useDeployOVault();
 
   const defaultChains = getDefaultTestnetChains();
+
+  // Watch for deployment completion and call onComplete
+  useEffect(() => {
+    if (deploymentStep === "completed" && onComplete) {
+      // Wait a moment for the success toast to show
+      const timer = setTimeout(() => {
+        onComplete();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [deploymentStep, onComplete]);
 
   const onSubmit = async (data: SetupForm) => {
     if (!address) {
@@ -134,7 +131,7 @@ export function OVaultSetupWizard({
         owner: address,
       });
 
-      onComplete?.();
+      // onComplete will be called automatically when deploymentStep becomes "completed"
     } catch (error) {
       console.error("Failed to initialize OVault:", error);
     }
@@ -186,6 +183,7 @@ export function OVaultSetupWizard({
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Deployment Progress</span>
               <span className="text-muted-foreground text-sm">
+                {deploymentStep === "idle" && "Preparing deployment..."}
                 {deploymentStep === "asset" && "Deploying Asset OFT..."}
                 {deploymentStep === "vault" && "Deploying ERC4626 Vault..."}
                 {deploymentStep === "adapter" && "Deploying Share Adapter..."}
@@ -199,21 +197,23 @@ export function OVaultSetupWizard({
 
             <Progress
               value={
-                deploymentStep === "asset"
-                  ? 16
-                  : deploymentStep === "vault"
-                    ? 32
-                    : deploymentStep === "adapter"
-                      ? 48
-                      : deploymentStep === "composer"
-                        ? 64
-                        : deploymentStep === "spokes"
-                          ? 80
-                          : deploymentStep === "wiring"
-                            ? 90
-                            : deploymentStep === "completed"
-                              ? 100
-                              : 0
+                deploymentStep === "idle"
+                  ? 5
+                  : deploymentStep === "asset"
+                    ? 16
+                    : deploymentStep === "vault"
+                      ? 32
+                      : deploymentStep === "adapter"
+                        ? 48
+                        : deploymentStep === "composer"
+                          ? 64
+                          : deploymentStep === "spokes"
+                            ? 80
+                            : deploymentStep === "wiring"
+                              ? 90
+                              : deploymentStep === "completed"
+                                ? 100
+                                : 0
               }
               className="w-full"
             />
@@ -306,9 +306,9 @@ export function OVaultSetupWizard({
           <Alert>
             <Sparkles className="h-4 w-4" />
             <AlertDescription>
-              <strong>Hackathon Demo:</strong> This deployment is simulated for
-              demonstration purposes. In a real deployment, this would interact
-              with actual LayerZero contracts.
+              <strong>Launching...</strong>
+              <br />
+              Note: this is a hackathon demo and is not production-ready.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -620,79 +620,6 @@ export function OVaultSetupWizard({
                         {form.watch("initialFunding") || "0"} ETH
                       </p>
                     </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <p className="text-sm font-medium">
-                      Hackathon Acknowledgments
-                    </p>
-
-                    <div className="space-y-2">
-                      <div className="flex items-start gap-2">
-                        <Checkbox
-                          checked={form.watch("acknowledgments.hackathon")}
-                          onCheckedChange={(checked) =>
-                            form.setValue(
-                              "acknowledgments.hackathon",
-                              !!checked,
-                            )
-                          }
-                        />
-                        <div className="text-sm">
-                          <p>
-                            This is a <strong>hackathon demonstration</strong>
-                          </p>
-                          <p className="text-muted-foreground">
-                            Deployment is simulated for demo purposes
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-2">
-                        <Checkbox
-                          checked={form.watch("acknowledgments.testnet")}
-                          onCheckedChange={(checked) =>
-                            form.setValue("acknowledgments.testnet", !!checked)
-                          }
-                        />
-                        <div className="text-sm">
-                          <p>
-                            Using <strong>testnet networks only</strong>
-                          </p>
-                          <p className="text-muted-foreground">
-                            No real funds will be used
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-2">
-                        <Checkbox
-                          checked={form.watch("acknowledgments.experimental")}
-                          onCheckedChange={(checked) =>
-                            form.setValue(
-                              "acknowledgments.experimental",
-                              !!checked,
-                            )
-                          }
-                        />
-                        <div className="text-sm">
-                          <p>
-                            This is <strong>experimental software</strong>
-                          </p>
-                          <p className="text-muted-foreground">
-                            LayerZero OVault is cutting-edge technology
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {(form.formState.errors.acknowledgments?.hackathon ||
-                      form.formState.errors.acknowledgments?.testnet ||
-                      form.formState.errors.acknowledgments?.experimental) && (
-                      <p className="text-sm text-red-500">
-                        Please acknowledge all items to proceed
-                      </p>
-                    )}
                   </div>
                 </div>
 

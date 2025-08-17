@@ -104,13 +104,13 @@ export function OVaultTreasuryDashboard({
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const handleDeposit = () => {
+  const handleDeposit = async () => {
     if (!depositAmount) {
       toast.error("Please enter deposit amount");
       return;
     }
 
-    crossChainDeposit(
+    await crossChainDeposit(
       oVaultAddresses.hubChain.composer,
       selectedFromChain,
       selectedToChain,
@@ -119,7 +119,7 @@ export function OVaultTreasuryDashboard({
     );
   };
 
-  const handleTransfer = () => {
+  const handleTransfer = async () => {
     if (!transferAmount) {
       toast.error("Please enter transfer amount");
       return;
@@ -135,7 +135,7 @@ export function OVaultTreasuryDashboard({
       return;
     }
 
-    transferShares(
+    await transferShares(
       fromChainAddress,
       selectedFromChain,
       selectedToChain,
