@@ -16,6 +16,7 @@ import {
   createDistributionSchema,
 } from "@/lib/validations/d-corp";
 
+
 export const dCorpRouter = createTRPCRouter({
   // D-Corp Management
   create: publicProcedure
@@ -24,18 +25,21 @@ export const dCorpRouter = createTRPCRouter({
       blockchainTxHash: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      // Create D-Corp first
       const [dCorp] = await ctx.db
         .insert(dCorps)
         .values({
           name: input.name,
           symbol: input.symbol,
-          description: input.description,
+          description: input.description + (input.blockchainTxHash ? `\n\nBlockchain TX: ${input.blockchainTxHash}` : ''),
           capitalPercentage: input.distributionConfig.capital,
           laborPercentage: input.distributionConfig.labor,
           consumerPercentage: input.distributionConfig.consumers,
-          attestations: input.attestations,
-          founderWalletAddress: input.founderWalletAddress,
-          blockchainTxHash: input.blockchainTxHash,
+          founderWalletAddress: input.founderWalletAddress, // Required field
+          attestations: {
+            ...input.attestations,
+            founderWalletAddress: input.founderWalletAddress, // Store wallet address in attestations
+          },
         })
         .returning();
 
@@ -46,12 +50,22 @@ export const dCorpRouter = createTRPCRouter({
         });
       }
 
-      // Add founder as a member with founder role
-      await ctx.db.insert(dCorpMembers).values({
-        dCorpId: dCorp.id,
-        walletAddress: input.founderWalletAddress,
-        role: "founder",
-      });
+      // Now create the founder as a member 
+      const [founderMember] = await ctx.db
+        .insert(dCorpMembers)
+        .values({
+          walletAddress: input.founderWalletAddress,
+          role: "founder",
+          dCorpId: dCorp.id, // Use the actual D-Corp ID
+        })
+        .returning();
+
+      if (!founderMember) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create founder member",
+        });
+      }
 
       return dCorp;
     }),

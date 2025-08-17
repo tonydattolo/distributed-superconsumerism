@@ -37,14 +37,11 @@ export const dCorps = pgTable("d_corps", {
   // Attestations
   attestations: jsonb("attestations").notNull(), // stores the required attestations
 
-  // Blockchain data
-  blockchainTxHash: varchar("blockchain_tx_hash", { length: 66 }), // Ethereum tx hash
-  contractAddress: varchar("contract_address", { length: 42 }), // Ethereum contract address
-  vaultAddress: varchar("vault_address", { length: 42 }), // Ethereum vault address
-  
   // Status and metadata
   isActive: boolean("is_active").default(true),
-  founderWalletAddress: varchar("founder_wallet_address", { length: 42 }).notNull(), // Ethereum wallet address
+  founderWalletAddress: varchar("founder_wallet_address", {
+    length: 42,
+  }).notNull(),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

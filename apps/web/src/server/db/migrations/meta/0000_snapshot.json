@@ -1,5 +1,5 @@
 {
-  "id": "da87f960-ddaf-463b-8e05-a410b105c447",
+  "id": "5be4877c-ee95-4ee5-a414-5a4d25e0762c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -151,24 +151,6 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true
-        },
-        "blockchain_tx_hash": {
-          "name": "blockchain_tx_hash",
-          "type": "varchar(66)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "contract_address": {
-          "name": "contract_address",
-          "type": "varchar(42)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "vault_address": {
-          "name": "vault_address",
-          "type": "varchar(42)",
-          "primaryKey": false,
-          "notNull": false
         },
         "is_active": {
           "name": "is_active",

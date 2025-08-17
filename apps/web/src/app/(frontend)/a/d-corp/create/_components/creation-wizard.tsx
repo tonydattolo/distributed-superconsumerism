@@ -112,7 +112,7 @@ export function CreationWizard() {
 
   // Handle blockchain transaction completion
   useEffect(() => {
-    if (isConfirmed && hash && walletAddress) {
+    if (isConfirmed && hash && walletAddress && !createDCorp.isPending) {
       // After blockchain transaction is confirmed, save to database
       const formData = form.getValues();
       createDCorp.mutate({
@@ -122,7 +122,7 @@ export function CreationWizard() {
       });
       setIsBlockchainStep(false);
     }
-  }, [isConfirmed, hash, createDCorp, form, walletAddress]);
+  }, [isConfirmed, hash, walletAddress]);
 
   const getFieldsForStep = (step: number): (keyof CreateDCorpInput)[] => {
     switch (step) {
