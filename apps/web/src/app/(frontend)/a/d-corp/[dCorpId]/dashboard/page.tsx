@@ -158,6 +158,8 @@ export default function DashboardPage({ params }: DashboardPageProps) {
           dCorpName={dashboardData.dCorp.name}
           oVaultAddresses={oVaultStatus.oVaultAddresses}
           oVaultConfig={oVaultStatus.oVaultConfig}
+          txHashes={oVaultStatus.oVaultTxHashes as Record<string, string>}
+          deploymentStatus={oVaultStatus.oVaultStatus}
         />
         
         {/* Traditional Dashboard */}

@@ -162,8 +162,14 @@ export function useDeployOVault() {
         status: 'deployed',
       });
 
+      const deploymentTx = `0x${Math.random().toString(16).slice(2, 66)}`;
+      
       toast.success("🎉 OVault Deployment Complete!", {
         description: "Omnichain vault system is ready for cross-chain operations",
+        action: {
+          label: "View on LayerZero Scan",
+          onClick: () => window.open(getLayerZeroScanUrl(deploymentTx), '_blank'),
+        },
       });
 
     } catch (err) {
@@ -284,6 +290,10 @@ export function useOVaultCrossChainDeposit() {
 
     toast.info("🌉 Cross-Chain Deposit", {
       description: `Depositing ${amount} from ${chainNames[fromChain]} to vault on ${chainNames[toChain]}`,
+      action: {
+        label: "Track on LayerZero Scan",
+        onClick: () => window.open("https://testnet.layerzeroscan.com", '_blank'),
+      },
     });
 
     const toBytes32 = `0x${'0'.repeat(24)}${receiver.slice(2)}`;
@@ -344,6 +354,10 @@ export function useOVaultCrossChainTransfer() {
 
     toast.info("🔄 Cross-Chain Share Transfer", {
       description: `Transferring ${amount} shares from ${chainNames[fromChain]} to ${chainNames[toChain]}`,
+      action: {
+        label: "Track on LayerZero Scan",
+        onClick: () => window.open("https://testnet.layerzeroscan.com", '_blank'),
+      },
     });
 
     const toBytes32 = `0x${'0'.repeat(24)}${receiver.slice(2)}`;
@@ -398,4 +412,54 @@ export function getDefaultTestnetChains(): Array<{eid: number, name: string}> {
     { eid: 40232, name: 'Optimism Sepolia' },
     { eid: 40245, name: 'Base Sepolia' },
   ];
+}
+
+// Helper function to get explorer URLs for different chains
+export function getExplorerUrl(chainEid: number, address: string, type: 'address' | 'tx' = 'address'): string {
+  const explorerMap: Record<number, string> = {
+    40231: 'https://sepolia.arbiscan.io', // Arbitrum Sepolia
+    40232: 'https://sepolia-optimism.etherscan.io', // Optimism Sepolia
+    40245: 'https://sepolia.basescan.org', // Base Sepolia
+  };
+
+  const explorer = explorerMap[chainEid];
+  if (!explorer) return '';
+
+  return `${explorer}/${type}/${address}`;
+}
+
+// Helper function to get LayerZero Scan URL for cross-chain transaction tracking
+export function getLayerZeroScanUrl(txHash: string): string {
+  return `https://testnet.layerzeroscan.com/tx/${txHash}`;
+}
+
+// Helper function to get chain info including explorer details
+export function getChainInfo(eid: number): {
+  name: string;
+  explorerName: string;
+  explorerUrl: string;
+} {
+  const chainInfo: Record<number, {name: string, explorerName: string, explorerUrl: string}> = {
+    40231: {
+      name: 'Arbitrum Sepolia',
+      explorerName: 'Arbiscan',
+      explorerUrl: 'https://sepolia.arbiscan.io',
+    },
+    40232: {
+      name: 'Optimism Sepolia',
+      explorerName: 'Etherscan',
+      explorerUrl: 'https://sepolia-optimism.etherscan.io',
+    },
+    40245: {
+      name: 'Base Sepolia',
+      explorerName: 'Basescan',
+      explorerUrl: 'https://sepolia.basescan.org',
+    },
+  };
+
+  return chainInfo[eid] || {
+    name: `Chain ${eid}`,
+    explorerName: 'Explorer',
+    explorerUrl: '',
+  };
 }

@@ -24,11 +24,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { OVaultTransactionTracker } from "./ovault-transaction-tracker";
 import { 
   useOVaultTreasuryBalance, 
   useOVaultCrossChainDeposit, 
   useOVaultCrossChainTransfer,
-  getChainName 
+  getChainName,
+  getExplorerUrl,
+  getLayerZeroScanUrl,
+  getChainInfo
 } from "@/lib/wagmi/ovault-hooks";
 
 interface OVaultAddresses {
@@ -58,13 +62,17 @@ interface OVaultTreasuryDashboardProps {
     shareSymbol: string;
     targetChains: number[];
   };
+  txHashes?: Record<string, string>;
+  deploymentStatus?: string;
 }
 
 export function OVaultTreasuryDashboard({ 
   dCorpId,
   dCorpName, 
   oVaultAddresses, 
-  oVaultConfig 
+  oVaultConfig,
+  txHashes,
+  deploymentStatus = 'deployed'
 }: OVaultTreasuryDashboardProps) {
   const [depositAmount, setDepositAmount] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
@@ -219,10 +227,11 @@ export function OVaultTreasuryDashboard({
 
       {/* Main Actions */}
       <Tabs defaultValue="deposit" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="deposit">Cross-Chain Deposit</TabsTrigger>
           <TabsTrigger value="transfer">Transfer Shares</TabsTrigger>
           <TabsTrigger value="contracts">Contract Info</TabsTrigger>
+          <TabsTrigger value="transactions">Transaction History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="deposit" className="space-y-4">
@@ -429,6 +438,20 @@ export function OVaultTreasuryDashboard({
                       >
                         <Copy className="h-3 w-3" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                      >
+                        <a
+                          href={getExplorerUrl(oVaultAddresses.hubChain.eid, oVaultAddresses.hubChain.vault)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={`View on ${getChainInfo(oVaultAddresses.hubChain.eid).explorerName}`}
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </Button>
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-2 bg-muted rounded">
@@ -441,6 +464,20 @@ export function OVaultTreasuryDashboard({
                         onClick={() => copyToClipboard(oVaultAddresses.hubChain.assetOFT, "Asset OFT address")}
                       >
                         <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                      >
+                        <a
+                          href={getExplorerUrl(oVaultAddresses.hubChain.eid, oVaultAddresses.hubChain.assetOFT)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={`View on ${getChainInfo(oVaultAddresses.hubChain.eid).explorerName}`}
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
                       </Button>
                     </div>
                   </div>
@@ -455,6 +492,20 @@ export function OVaultTreasuryDashboard({
                       >
                         <Copy className="h-3 w-3" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                      >
+                        <a
+                          href={getExplorerUrl(oVaultAddresses.hubChain.eid, oVaultAddresses.hubChain.shareAdapter)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={`View on ${getChainInfo(oVaultAddresses.hubChain.eid).explorerName}`}
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </Button>
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-2 bg-muted rounded">
@@ -467,6 +518,20 @@ export function OVaultTreasuryDashboard({
                         onClick={() => copyToClipboard(oVaultAddresses.hubChain.composer, "Composer address")}
                       >
                         <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                      >
+                        <a
+                          href={getExplorerUrl(oVaultAddresses.hubChain.eid, oVaultAddresses.hubChain.composer)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={`View on ${getChainInfo(oVaultAddresses.hubChain.eid).explorerName}`}
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
                       </Button>
                     </div>
                   </div>
@@ -498,6 +563,20 @@ export function OVaultTreasuryDashboard({
                               >
                                 <Copy className="h-3 w-3" />
                               </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                asChild
+                              >
+                                <a
+                                  href={getExplorerUrl(Number(eid), addresses.assetOFT)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title={`View on ${getChainInfo(Number(eid)).explorerName}`}
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              </Button>
                             </div>
                           </div>
                         )}
@@ -512,6 +591,20 @@ export function OVaultTreasuryDashboard({
                                 onClick={() => copyToClipboard(addresses.shareOFT!, "Share OFT address")}
                               >
                                 <Copy className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                asChild
+                              >
+                                <a
+                                  href={getExplorerUrl(Number(eid), addresses.shareOFT)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title={`View on ${getChainInfo(Number(eid)).explorerName}`}
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
                               </Button>
                             </div>
                           </div>
@@ -528,24 +621,79 @@ export function OVaultTreasuryDashboard({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ExternalLink className="h-5 w-5" />
-                External Links
+                External Resources
               </CardTitle>
+              <CardDescription>
+                Useful links for exploring contracts and transactions
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start" asChild>
-                <a href="https://docs.layerzero.network" target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  LayerZero Documentation
-                </a>
-              </Button>
-              <Button variant="outline" className="w-full justify-start" asChild>
-                <a href="https://testnet.layerzeroscan.com" target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  LayerZero Testnet Scanner
-                </a>
-              </Button>
+              <div className="space-y-2">
+                <h5 className="text-sm font-medium">Chain Explorers</h5>
+                {[oVaultAddresses.hubChain.eid, ...Object.keys(oVaultAddresses.spokeChains).map(Number)].map((eid) => {
+                  const chainInfo = getChainInfo(eid);
+                  return (
+                    <Button key={eid} variant="outline" className="w-full justify-start" asChild>
+                      <a href={chainInfo.explorerUrl} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        {chainInfo.name} - {chainInfo.explorerName}
+                      </a>
+                    </Button>
+                  );
+                })}
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <h5 className="text-sm font-medium">LayerZero Resources</h5>
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <a href="https://docs.layerzero.network" target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    LayerZero Documentation
+                  </a>
+                </Button>
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <a href="https://testnet.layerzeroscan.com" target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    LayerZero Testnet Scanner
+                  </a>
+                </Button>
+                <Button variant="outline" className="w-full justify-start" asChild>
+                  <a href="https://docs.layerzero.network/v2/developers/evm/oft/quickstart" target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    OFT Development Guide
+                  </a>
+                </Button>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <h5 className="text-sm font-medium">Example Transactions</h5>
+                <Button variant="outline" className="w-full justify-start text-xs" asChild>
+                  <a href="https://sepolia.arbiscan.io/tx/0xa02efd16c29895ceead23e315ab8a00a55d44baa27879c5243cc25c7eb998a1b" target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-3 w-3 mr-2" />
+                    Arbitrum Sepolia - Example OVault Deploy
+                  </a>
+                </Button>
+                <Button variant="outline" className="w-full justify-start text-xs" asChild>
+                  <a href="https://testnet.layerzeroscan.com/tx/0xa02efd16c29895ceead23e315ab8a00a55d44baa27879c5243cc25c7eb998a1b" target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-3 w-3 mr-2" />
+                    LayerZero Scan - Cross-chain Tracking
+                  </a>
+                </Button>
+              </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="transactions" className="space-y-4">
+          <OVaultTransactionTracker
+            dCorpId={dCorpId}
+            txHashes={txHashes}
+            deploymentStatus={deploymentStatus}
+          />
         </TabsContent>
       </Tabs>
     </div>
