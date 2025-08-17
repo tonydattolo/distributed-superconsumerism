@@ -46,7 +46,7 @@ export default function Home() {
             : "bg-transparent"
         }`}
       >
-        <div className="container flex h-20 items-center justify-between py-4">
+        <div className="container mx-auto flex h-20 max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
             <div className="relative"></div>
             <span className="font-orbitron text-foreground text-xl tracking-wider">
@@ -91,7 +91,7 @@ export default function Home() {
             mobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
           }`}
         >
-          <div className="bg-background/90 border-border container flex flex-col space-y-4 border-t py-4 backdrop-blur-md">
+          <div className="bg-background/90 border-border container mx-auto flex max-w-7xl flex-col space-y-4 border-t px-6 py-4 backdrop-blur-md">
             {menuItems.map((item) => (
               <Link
                 key={item.label}
@@ -119,7 +119,7 @@ export default function Home() {
             <div className="h-full w-full bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
           </div>
 
-          <div className="relative z-10 container mx-auto px-4 text-center">
+          <div className="relative z-10 container mx-auto max-w-7xl px-6 text-center">
             <div className="bg-primary/10 text-primary mx-auto mb-8 flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm">
               <Coins className="h-4 w-4" />
               Distributed Superconsumerism
@@ -166,7 +166,7 @@ export default function Home() {
 
         {/* Stakeholder Benefits Section */}
         <section className="bg-muted/30 relative py-20">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto max-w-7xl px-6">
             <div className="mb-12 text-center">
               <h2 className="text-foreground text-3xl font-bold tracking-tight sm:text-4xl">
                 Value Distribution for All Stakeholders
@@ -281,7 +281,7 @@ export default function Home() {
             <div className="h-full w-full bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
           </div>
 
-          <div className="relative container mx-auto px-4">
+          <div className="relative container mx-auto max-w-7xl px-6">
             <div className="mb-16 text-center">
               <h2 className="text-foreground text-4xl font-bold tracking-tight sm:text-5xl">
                 Rethinking Corporate Structure
@@ -418,7 +418,7 @@ export default function Home() {
             <div className="h-full w-full bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
           </div>
 
-          <div className="relative container mx-auto px-4">
+          <div className="relative container mx-auto max-w-7xl px-6">
             <div className="mb-16 text-center">
               <h2 className="text-foreground text-4xl font-bold tracking-tight sm:text-5xl">
                 Built for the Future of Work
@@ -500,7 +500,7 @@ export default function Home() {
             <div className="h-full w-full bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
           </div>
 
-          <div className="relative container mx-auto px-4">
+          <div className="relative container mx-auto max-w-7xl px-6">
             <div className="mb-16 text-center">
               <h2 className="text-foreground text-4xl font-bold tracking-tight sm:text-5xl">
                 Ready to Launch Your D-Corp?
@@ -578,12 +578,11 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="bg-background border-border relative overflow-hidden border-t py-16">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto max-w-7xl px-6">
             <div className="grid gap-12 md:grid-cols-4">
               <div>
                 <div className="mb-6 flex items-center gap-2">
-                  <Building2 className="text-primary h-8 w-8" />
-                  <span className="text-primary text-xl font-bold tracking-wider">
+                  <span className="text-primary font-orbitron text-xl tracking-wider">
                     D-CORP
                   </span>
                 </div>
