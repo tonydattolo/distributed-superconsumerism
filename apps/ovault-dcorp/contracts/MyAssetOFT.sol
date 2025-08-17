@@ -31,6 +31,6 @@ contract MyAssetOFT is OFT {
     ) OFT(_name, _symbol, _lzEndpoint, _delegate) Ownable(_delegate) {
         // NOTE: Uncomment the line below if you need to mint initial supply
         // This can be useful for testing or if the asset needs initial liquidity
-        // _mint(msg.sender, 1 ether);
+        _mint(msg.sender, .25 ether);
     }
 }

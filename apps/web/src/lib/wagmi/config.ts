@@ -1,9 +1,15 @@
 import { createConfig, http, cookieStorage, createStorage } from "wagmi";
-import { mainnet, sepolia } from "wagmi/chains";
+import {
+  mainnet,
+  sepolia,
+  arbitrumSepolia,
+  optimismSepolia,
+  baseSepolia,
+} from "wagmi/chains";
 
 export function getConfig() {
   return createConfig({
-    chains: [mainnet, sepolia],
+    chains: [mainnet, sepolia, arbitrumSepolia, optimismSepolia, baseSepolia],
     ssr: true,
     storage: createStorage({
       storage: cookieStorage,
@@ -11,9 +17,13 @@ export function getConfig() {
     transports: {
       [mainnet.id]: http(),
       [sepolia.id]: http(),
+      [arbitrumSepolia.id]: http("https://sepolia-rollup.arbitrum.io/rpc"),
+      [optimismSepolia.id]: http("https://sepolia.optimism.io"),
+      [baseSepolia.id]: http("https://sepolia.base.org"),
     },
   });
 }
+
 // import { createConfig, http, cookieStorage, createStorage } from "wagmi";
 // import { mainnet, sepolia, optimism, arbitrum, base } from "wagmi/chains";
 // import {
