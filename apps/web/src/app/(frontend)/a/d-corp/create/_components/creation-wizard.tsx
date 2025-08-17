@@ -72,6 +72,14 @@ export function CreationWizard() {
     error: blockchainError,
   } = useCreateDCorp();
 
+  // TODO: Add OVault deployment hooks here
+  // For Phase 2: useDeployOVaultSystem() will handle:
+  // 1. Deploy AssetOFT (D-Corp token with LayerZero)
+  // 2. Deploy ERC4626 vault
+  // 3. Deploy ShareOFTAdapter
+  // 4. Deploy OVaultComposer
+  // 5. Wire cross-chain connections
+
   const createDCorp = api.dCorp.create.useMutation({
     onSuccess: (dCorp) => {
       toast.success(`${dCorp.name} has been launched.`);
@@ -113,12 +121,17 @@ export function CreationWizard() {
   // Handle blockchain transaction completion
   useEffect(() => {
     if (isConfirmed && hash && walletAddress && !createDCorp.isPending) {
-      // After blockchain transaction is confirmed, save to database
+      // After D-Corp blockchain transaction is confirmed, save to database
       const formData = form.getValues();
+      
+      // TODO: For Phase 2, add OVault deployment here before saving to database
+      // const oVaultAddresses = await deployOVaultSystem(...)
+      
       createDCorp.mutate({
         ...formData,
         founderWalletAddress: walletAddress,
         blockchainTxHash: hash,
+        // oVaultAddresses: null, // Will be added in Phase 2
       });
       setIsBlockchainStep(false);
     }

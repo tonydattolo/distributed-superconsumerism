@@ -37,6 +37,45 @@ export const dCorps = pgTable("d_corps", {
   // Attestations
   attestations: jsonb("attestations").notNull(), // stores the required attestations
 
+  // Blockchain addresses
+  blockchainTxHash: varchar("blockchain_tx_hash", { length: 66 }), // 0x + 64 chars
+  
+  // OVault deployment and configuration status
+  oVaultStatus: varchar("ovault_status", { length: 20 }).default("not_deployed"), // not_deployed, deploying, deployed, failed
+  oVaultDeployedAt: timestamp("ovault_deployed_at"),
+  oVaultTxHashes: jsonb("ovault_tx_hashes").$type<{
+    [step: string]: string; // deployment step -> transaction hash
+  }>(),
+  
+  // OVault contract addresses (LayerZero omnichain vault system)
+  oVaultAddresses: jsonb("ovault_addresses").$type<{
+    // Hub chain (Arbitrum Sepolia) addresses
+    hubChain: {
+      eid: number; // LayerZero endpoint ID (40231 for Arbitrum Sepolia)
+      assetOFT: string; // MyAssetOFT address
+      vault: string; // MyERC4626 address  
+      shareAdapter: string; // MyShareOFTAdapter address
+      composer: string; // MyOVaultComposer address
+    };
+    // Spoke chain addresses
+    spokeChains: {
+      [eid: number]: {
+        assetOFT?: string; // MyAssetOFT address
+        shareOFT?: string; // MyShareOFT address
+      };
+    };
+  }>(),
+  
+  // OVault configuration
+  oVaultConfig: jsonb("ovault_config").$type<{
+    assetName: string; // e.g., "TechCorpAsset"
+    assetSymbol: string; // e.g., "TCA"
+    shareName: string; // e.g., "TechCorpShares"
+    shareSymbol: string; // e.g., "TCS"
+    targetChains: number[]; // LayerZero endpoint IDs for spoke chains
+    initialFunding?: string; // Initial funding amount in ETH
+  }>(),
+
   // Status and metadata
   isActive: boolean("is_active").default(true),
   founderWalletAddress: varchar("founder_wallet_address", {

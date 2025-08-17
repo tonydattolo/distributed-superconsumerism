@@ -3,6 +3,8 @@
 import { use } from "react";
 import { api } from "@/trpc/react";
 import { DashboardOverview } from "./_components/dashboard-overview";
+import { OVaultSetupWizard } from "./_components/ovault-setup-wizard";
+import { OVaultTreasuryDashboard } from "./_components/ovault-treasury-dashboard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -22,6 +24,14 @@ export default function DashboardPage({ params }: DashboardPageProps) {
     { 
       enabled: !!dCorpId,
       refetchInterval: 30000, // Refresh every 30 seconds
+    }
+  );
+
+  const { data: oVaultStatus, isLoading: isLoadingOVault } = api.dCorp.getOVaultStatus.useQuery(
+    { dCorpId },
+    { 
+      enabled: !!dCorpId,
+      refetchInterval: 10000, // Check OVault status more frequently
     }
   );
 
@@ -122,6 +132,60 @@ export default function DashboardPage({ params }: DashboardPageProps) {
     );
   }
 
+  // Show OVault setup wizard if OVault is not deployed
+  if (oVaultStatus?.oVaultStatus === "not_deployed") {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <OVaultSetupWizard
+          dCorpId={dCorpId}
+          dCorpName={dashboardData.dCorp.name}
+          dCorpSymbol={dashboardData.dCorp.symbol}
+          onComplete={() => {
+            refetch();
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Show OVault treasury dashboard if deployed
+  if (oVaultStatus?.oVaultStatus === "deployed" && oVaultStatus?.oVaultAddresses && oVaultStatus?.oVaultConfig) {
+    return (
+      <div className="container mx-auto py-8 px-4 space-y-8">
+        {/* OVault Treasury Section */}
+        <OVaultTreasuryDashboard
+          dCorpId={dCorpId}
+          dCorpName={dashboardData.dCorp.name}
+          oVaultAddresses={oVaultStatus.oVaultAddresses}
+          oVaultConfig={oVaultStatus.oVaultConfig}
+        />
+        
+        {/* Traditional Dashboard */}
+        <DashboardOverview
+          dCorp={dashboardData.dCorp}
+          metrics={dashboardData.metrics}
+          recentDistributions={dashboardData.recentDistributions}
+          onDataRefresh={() => refetch()}
+        />
+      </div>
+    );
+  }
+
+  // Show deployment status if in progress
+  if (oVaultStatus?.oVaultStatus === "deploying") {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            OVault deployment is in progress. Please wait while the omnichain vault system is being deployed.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  // Fallback to traditional dashboard
   return (
     <div className="container mx-auto py-8 px-4">
       <DashboardOverview

@@ -365,4 +365,167 @@ export const dCorpRouter = createTRPCRouter({
 
       return removedMember;
     }),
+
+  // OVault Management
+  initializeOVault: publicProcedure
+    .input(
+      z.object({
+        dCorpId: z.string().uuid(),
+        assetName: z.string().min(1),
+        assetSymbol: z.string().min(1).max(10),
+        shareName: z.string().min(1),
+        shareSymbol: z.string().min(1).max(10),
+        targetChains: z.array(z.number()).min(1), // LayerZero endpoint IDs
+        initialFunding: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [dCorp] = await ctx.db
+        .select()
+        .from(dCorps)
+        .where(eq(dCorps.id, input.dCorpId));
+
+      if (!dCorp) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "D-Corp not found",
+        });
+      }
+
+      if (dCorp.oVaultStatus !== "not_deployed") {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "OVault already initialized or in deployment",
+        });
+      }
+
+      const [updatedDCorp] = await ctx.db
+        .update(dCorps)
+        .set({
+          oVaultStatus: "deploying",
+          oVaultConfig: {
+            assetName: input.assetName,
+            assetSymbol: input.assetSymbol,
+            shareName: input.shareName,
+            shareSymbol: input.shareSymbol,
+            targetChains: input.targetChains,
+            initialFunding: input.initialFunding,
+          },
+          updatedAt: new Date(),
+        })
+        .where(eq(dCorps.id, input.dCorpId))
+        .returning();
+
+      return updatedDCorp;
+    }),
+
+  updateOVaultDeployment: publicProcedure
+    .input(
+      z.object({
+        dCorpId: z.string().uuid(),
+        step: z.string(),
+        txHash: z.string().optional(),
+        contractAddress: z.string().optional(),
+        contractType: z.enum(["assetOFT", "vault", "shareAdapter", "composer", "spokeAssetOFT", "spokeShareOFT"]).optional(),
+        chainEid: z.number().optional(),
+        status: z.enum(["deploying", "deployed", "failed"]).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [dCorp] = await ctx.db
+        .select()
+        .from(dCorps)
+        .where(eq(dCorps.id, input.dCorpId));
+
+      if (!dCorp) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "D-Corp not found",
+        });
+      }
+
+      // Update transaction hashes
+      const currentTxHashes = (dCorp.oVaultTxHashes as Record<string, string>) || {};
+      if (input.txHash) {
+        currentTxHashes[input.step] = input.txHash;
+      }
+
+      // Update contract addresses
+      let currentAddresses = dCorp.oVaultAddresses as any;
+      if (input.contractAddress && input.contractType) {
+        if (!currentAddresses) {
+          currentAddresses = {
+            hubChain: { eid: 40231 }, // Arbitrum Sepolia
+            spokeChains: {},
+          };
+        }
+
+        if (input.contractType === "spokeAssetOFT" || input.contractType === "spokeShareOFT") {
+          if (!currentAddresses.spokeChains[input.chainEid!]) {
+            currentAddresses.spokeChains[input.chainEid!] = {};
+          }
+          if (input.contractType === "spokeAssetOFT") {
+            currentAddresses.spokeChains[input.chainEid!].assetOFT = input.contractAddress;
+          } else {
+            currentAddresses.spokeChains[input.chainEid!].shareOFT = input.contractAddress;
+          }
+        } else {
+          // Hub chain contracts
+          if (input.contractType === "assetOFT") {
+            currentAddresses.hubChain.assetOFT = input.contractAddress;
+          } else if (input.contractType === "vault") {
+            currentAddresses.hubChain.vault = input.contractAddress;
+          } else if (input.contractType === "shareAdapter") {
+            currentAddresses.hubChain.shareAdapter = input.contractAddress;
+          } else if (input.contractType === "composer") {
+            currentAddresses.hubChain.composer = input.contractAddress;
+          }
+        }
+      }
+
+      const updateData: any = {
+        oVaultTxHashes: currentTxHashes,
+        oVaultAddresses: currentAddresses,
+        updatedAt: new Date(),
+      };
+
+      if (input.status) {
+        updateData.oVaultStatus = input.status;
+        if (input.status === "deployed") {
+          updateData.oVaultDeployedAt = new Date();
+        }
+      }
+
+      const [updatedDCorp] = await ctx.db
+        .update(dCorps)
+        .set(updateData)
+        .where(eq(dCorps.id, input.dCorpId))
+        .returning();
+
+      return updatedDCorp;
+    }),
+
+  getOVaultStatus: publicProcedure
+    .input(z.object({ dCorpId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const [dCorp] = await ctx.db
+        .select({
+          oVaultStatus: dCorps.oVaultStatus,
+          oVaultConfig: dCorps.oVaultConfig,
+          oVaultAddresses: dCorps.oVaultAddresses,
+          oVaultTxHashes: dCorps.oVaultTxHashes,
+          oVaultDeployedAt: dCorps.oVaultDeployedAt,
+        })
+        .from(dCorps)
+        .where(eq(dCorps.id, input.dCorpId));
+
+      if (!dCorp) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "D-Corp not found",
+        });
+      }
+
+      return dCorp;
+    }),
 });

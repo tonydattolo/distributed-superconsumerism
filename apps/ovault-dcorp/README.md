@@ -438,12 +438,17 @@ The `lz:ovault:send` task handles four different operation types automatically b
 
 Send assets from any spoke chain to receive vault shares on any other chain:
 
+Ethereum Sepolia → 40161
+Arbitrum Sepolia → 40231
+Optimism Sepolia → 40232
+Base Sepolia → 40245
+
 ```bash
 # Send 1.0 asset from Arbitrum to get shares on Optimism
 npx hardhat lz:ovault:send \
-  --src-eid 30110 \
-  --dst-eid 30111 \
-  --amount 1.0 \
+  --src-eid 40231 \
+  --dst-eid 40232 \
+  --amount 0.000002 \
   --to 0xYourRecipientAddress \
   --token-type asset
 ```
